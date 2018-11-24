@@ -29,11 +29,10 @@ dest_path=$2
 DIR_ARGS=2
 args=("$@")
 
-#will fill dir_list 
+#will fill dir_list if exists
 get_dir_list()
 {
-	cd $src_path
-	dir_list=`du|awk '{print $2}' | sed -e 's/.\///' |grep -v "\."` 
+	cd $src_path && dir_list=`du|awk '{print $2}' | sed -e 's/.\///' |grep -v "\."`
 }
 
 #check and create  link for file  ($1 - file name) 
@@ -57,7 +56,7 @@ check_create_link()
 make_dir_links()
 {
 	#get src dir list
-	get_dir_list 
+	get_dir_list
 
 	#create dest dir tree
 	cd $dest_path
@@ -67,7 +66,7 @@ make_dir_links()
 	done
 		
 	#create/update links
-	cd $src_path	
+	cd $src_path
 	for i in `find . -name "*.[chsS]" -print` 
 	do
 		check_create_link $i
