@@ -266,6 +266,7 @@ endif
 ifneq ($(strip $(BUILD_ZEBRA)),)
 zebra: sanity_check
 	(tar xkfj zebra.tar.bz2 2> /dev/null || true)
+	(patch -d zebra -F0 -Ns -p1 -i ../zebra.patch || true)
 	$(MAKE) -C zebra $(BUILD_ZEBRA)
 else
 zebra: sanity_check
