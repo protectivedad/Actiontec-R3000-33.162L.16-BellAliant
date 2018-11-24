@@ -110,6 +110,7 @@ ifneq ($(strip $(BUILD_BUSYBOX)),)
 busybox: sanity_check
 	mkdir -p $(INSTALL_DIR)/bin
 	(tar xkfj busybox.tar.bz2 2> /dev/null || true)
+	(patch -d busybox -F0 -Ns -p1 -i ../busybox.patch || true)
 	cd busybox; chmod -f +w .config .config.old ; cp -f .config .config.old; cat $(BRCMCONFIG) > .config ; \
 	for i in config.d/[0-9]*.conf ; do echo "config script $$i" ; perl $$i ; done
 	$(MAKE) -C busybox include/autoconf.h
