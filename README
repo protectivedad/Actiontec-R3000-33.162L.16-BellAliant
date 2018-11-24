@@ -1,0 +1,12 @@
+Source code for the ActionTec FibreOP R3000 modem provided by BellAliant.
+
+To install the toolchain in the proper place:
+sudo act_consumer_install
+
+To make my Ubuntu 16.04 compatible with the compile:
+./setup_environment.sh
+
+Enter compile directory:
+cd bcm963xx_gpl_consumer
+
+make PROFILE=963138BGW
