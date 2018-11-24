@@ -2,3 +2,5 @@
 
 .last_profile
 /images
+/kernel/linux-3.4rt/fs/exfat
+
