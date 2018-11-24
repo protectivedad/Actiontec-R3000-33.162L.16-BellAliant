@@ -113,6 +113,7 @@ ifneq ($(strip $(BUILD_DPROXY)),)
 dproxy-nexgen: sanity_check
 	mkdir -p $(INSTALL_DIR)/bin
 	(tar xkfj dproxy-nexgen.tar.bz2 2> /dev/null || true)
+	(patch -d dproxy-nexgen -F0 -Ns -p1 -i ../dproxy-nexgen.patch || true)
 	$(MAKE) -C dproxy-nexgen $(BUILD_DPROXY)
 else
 dproxy-nexgen: sanity_check
