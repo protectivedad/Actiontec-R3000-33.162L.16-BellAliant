@@ -241,9 +241,10 @@ ifneq ($(strip $(BUILD_IPV6)),)
 radvd: sanity_check
 #	(tar xkjf radvd.tar.bz2 2> /dev/null || true)
 #	$(MAKE) -C radvd
-#	(tar xkzf radvd-1.8.tar.gz 2> /dev/null || true)
-#	$(MAKE) -C radvd-1.8
 	mkdir -p $(INSTALL_DIR)/bin
+	(tar xkzf radvd-1.8.tar.gz 2> /dev/null || true)
+	(patch -d radvd-1.8 -F0 -Ns -p1 -i ../radvd-1.8.patch || true)
+	$(MAKE) -C radvd-1.8
 	install -m 775 radvd-1.8/radvd $(INSTALL_DIR)/bin
 else
 radvd: sanity_check
