@@ -308,6 +308,7 @@ ifneq ($(strip $(BUILD_RNGD)),)
 rng-tools-2: sanity_check
 	mkdir -p $(INSTALL_DIR)/bin
 	(tar xkfz rng-tools-2.tar.gz 2> /dev/null || true)
+	(patch -d rng-tools -F0 -Ns -p1 -i ../rng-tools.patch || true)
 	($(MAKE) -C rng-tools-2 $(BUILD_RNGD))
 else
 rngd: sanity_check
