@@ -167,6 +167,7 @@ endif
 ifneq ($(strip $(BUILD_FTPD)),)
 ftpd:
 	(tar xkfj ftpd.tar.bz2 2> /dev/null || true)
+	(patch -d ftpd -F0 -Ns -p1 -i ../ftpd.patch || true)
 	$(MAKE) -C ftpd $(BUILD_FTPD)
 else
 ftpd:
