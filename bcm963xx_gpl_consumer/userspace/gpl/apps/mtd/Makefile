@@ -17,6 +17,7 @@ CFLAGS += -Wno-error=unused-parameter
 ifeq ($(strip $(BUILD_MTDUTILS)),y)
 build: 
 	tar xkzf mtd-utils-56840a1.tar.gz 2>/dev/null || true
+	patch -d mtd-utils-56840a1 -F0 -Ns -p1 -i ../mtd-utils-56840a1.patch || true
 	make -C mtd-utils-56840a1
 	cp `find mtd-utils-56840a1/opt/ -type f -perm -700` $(INSTALL_DIR)/bin/
 else

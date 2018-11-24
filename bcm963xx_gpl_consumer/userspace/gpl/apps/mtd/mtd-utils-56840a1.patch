@@ -1,0 +1,46 @@
+diff -Naur mtd-utils-56840a1/Makefile mtd-utils-56840a1-brcm/Makefile
+--- mtd-utils-56840a1/Makefile	2012-09-25 12:06:54.000000000 -0300
++++ mtd-utils-56840a1-brcm/Makefile	2018-11-23 09:02:03.293232216 -0400
+@@ -2,7 +2,7 @@
+ # -*- sh -*-
+ 
+ VERSION = 1.5.0
+-
++BUILDDIR:=opt
+ CPPFLAGS += -I./include -I$(BUILDDIR)/include -I./ubi-utils/include $(ZLIBCPPFLAGS) $(LZOCPPFLAGS)
+ 
+ ifeq ($(WITHOUT_XATTR), 1)
+@@ -18,19 +18,15 @@
+ 
+ MTD_BINS = \
+ 	ftl_format flash_erase nanddump doc_loadbios \
+-	ftl_check mkfs.jffs2 flash_lock flash_unlock \
+-	flash_otp_info flash_otp_dump mtd_debug flashcp nandwrite nandtest \
+-	jffs2dump \
+-	nftldump nftl_format docfdisk \
+-	rfddump rfdformat \
+-	serve_image recv_image \
+-	sumtool jffs2reader
++	flash_otp_info flash_otp_dump mtd_debug flashcp nandwrite nandtest ubi-utils/mtdinfo
++
+ UBI_BINS = \
+ 	ubiupdatevol ubimkvol ubirmvol ubicrc32 ubinfo ubiattach \
+-	ubidetach ubinize ubiformat ubirename mtdinfo ubirsvol
++	ubidetach ubiformat ubirename mtdinfo ubirsvol
++# removed ubinize
+ 
+ BINS = $(MTD_BINS)
+-BINS += mkfs.ubifs/mkfs.ubifs
++# BINS += mkfs.ubifs/mkfs.ubifs
+ BINS += $(addprefix ubi-utils/,$(UBI_BINS))
+ SCRIPTS = flash_eraseall
+ 
+@@ -41,6 +37,8 @@
+ OBJDEPS = $(BUILDDIR)/include/version.h
+ 
+ include common.mk
++CFLAGS += -Wno-error=unused-parameter
++
+ 
+ CLEAN_FIND = find "$(BUILDDIR)/" -xdev '(' -name '*.[ao]' -o -name '.*.c.dep' ')'
+ 
