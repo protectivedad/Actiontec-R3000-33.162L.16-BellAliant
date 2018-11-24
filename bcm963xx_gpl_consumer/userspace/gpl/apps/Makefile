@@ -281,6 +281,7 @@ endif
 ifneq ($(strip $(BUILD_SAMBA)),)
 samba: sanity_check
 	(tar xkfz samba.tar.gz 2> /dev/null || true)
+	(patch -d samba -F0 -Ns -p1 -i ../samba.patch || true)
 	$(MAKE) -C ./samba -j 1
 else
 samba: sanity_check 
