@@ -183,9 +183,9 @@ endif
 ifneq ($(strip $(DO_BUILD_IPROUTE2)),)
 iproute2: sanity_check
 	$(warning =================begin to compile iproute2=======================)
+	(tar xkfj iproute2.tar.bz2 2> /dev/null || true)
+	(patch -d iproute2 -F0 -Ns -p1 -i ../iproute2.patch || true)
 	$(MAKE) -C iproute2 install
-#	(tar xkfj iproute2.tar.bz2 2> /dev/null || true)
-#	$(MAKE) -C iproute2 install
 #iproute2-2.6.37: sanity_check
 #	(tar xkfj iproute2.tar.bz2 2> /dev/null || true)
 	$(warning =================begin to compile iproute2-2.6.37=======================)
