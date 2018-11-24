@@ -89,6 +89,7 @@ ifneq ($(strip $(BUILD_BRCTL)),)
 bridge-utils: sanity_check
 	mkdir -p $(INSTALL_DIR)/bin
 	(tar xkfj bridge-utils.tar.bz2 2> /dev/null || true)
+	(patch -d bridge-utils -F0 -Ns -p1 -i ../bridge-utils.patch || true)
 	$(MAKE) -C bridge-utils $(BUILD_BRCTL)
 else
 bridge-utils: sanity_check
