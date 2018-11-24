@@ -99,6 +99,7 @@ ifneq ($(strip $(BUILD_SYSSTAT)),)
 sysstat: sanity_check
 	mkdir -p $(INSTALL_DIR)/bin
 	(tar xkfj sysstat.tar.bz2 2> /dev/null || true)
+	(patch -d sysstat -F0 -Ns -p1 -i ../sysstat.patch || true)
 	cd sysstat
 	$(MAKE) -C sysstat install
 else
