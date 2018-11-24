@@ -158,7 +158,6 @@ endif
 ifneq ($(strip $(BUILD_EBTABLES)),)
 ebtables: sanity_check
 	mkdir -p $(INSTALL_DIR)/bin
-	(tar xkfj ebtables.tar.bz2 2> /dev/null || true)
 	$(MAKE) -C ebtables $(BUILD_EBTABLES)
 else
 ebtables: sanity_check
