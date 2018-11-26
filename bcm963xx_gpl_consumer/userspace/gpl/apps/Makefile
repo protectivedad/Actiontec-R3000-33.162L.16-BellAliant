@@ -212,7 +212,7 @@ endif
 ifneq ($(strip $(BRCM_KERNEL_NETFILTER)),)
 ifneq ($(strip $(BUILD_IPTABLES)),)
 iptables: sanity_check
-	(tar xkfj iptables.tar.bz2 2> /dev/null || true)
+#	(tar xkfj iptables.tar.bz2 2> /dev/null || true)
 	$(MAKE) -C iptables $(BUILD_IPTABLES)
 else
 iptables: sanity_check
