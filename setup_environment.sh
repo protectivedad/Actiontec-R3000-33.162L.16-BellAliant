@@ -1,7 +1,3 @@
 #!/bin/bash
-# Switch sh to bash for this session
 
-sudo unshare -m sudo -u $USER /bin/bash
-sudo mount --bind /bin/bash /bin/sh
-
-exit $?
+sudo -E unshare -m sudo -E -u $USER /bin/bash -i <<< '. setup_bash_shell.sh; exec </dev/tty'
