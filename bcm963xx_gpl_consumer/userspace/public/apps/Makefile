@@ -13,9 +13,9 @@
 # are listed in the AUTODETECT_SUBDIRS variable.  Type make show_subdirs)
 #
 ifneq ($(strip $(AEI_CONTROL_LAYER)),)
-HARDCODED_SUBDIRS := dhcpv6-aei sshd ledctl dhrystone radvd tcpdump
+HARDCODED_SUBDIRS := dhcpv6-aei sshd ledctl dhrystone radvd tcpdump dropbear
 else
-HARDCODED_SUBDIRS := dhcpv6 sshd ledctl dhrystone radvd
+HARDCODED_SUBDIRS := dhcpv6 sshd ledctl dhrystone radvd dropbear
 endif
 
 
@@ -98,6 +98,30 @@ clean: generic_subdir_clean
 $(AUTODETECT_SUBDIRS_BASE): 
 	$(MAKE) -C $@
 
+dropbear:
+	@if [ ! -e dropbear/INSTALL ]; then \
+	    [ ! -e dropbear.tar.bz2 ] && wget -q -O dropbear.tar.bz2 https://matt.ucc.asn.au/dropbear/releases/dropbear-2017.75.tar.bz2 || true; \
+	    mkdir -p dropbear; \
+	    (tar -C dropbear --strip-components=1 -xkjf dropbear.tar.bz2 2> /dev/null || true); \
+	fi
+	@if [ ! -e dropbear/Makefile ]; then \
+	    cd dropbear; ac_cv_linux_vers=$(LINUX_VER_STR) ./configure --host=$(TOOLCHAIN_PREFIX) \
+	             --prefix=$(INSTALL_DIR) \
+	             --libdir=$(INSTALL_DIR)/lib/gpl \
+	             --sysconfdir=/data/etc \
+	             --sbindir=$(INSTALL_DIR)/bin \
+	             --disable-zlib \
+	             --disable-utmp --disable-utmpx \
+	             --disable-wtmp --disable-wtmpx \
+	             --disable-lastlog \
+	             LDFLAGS=-L$(INSTALL_DIR)/lib/gpl; \
+	fi
+	$(MAKE) -C dropbear PROGRAMS="dropbear dropbearkey scp" MULTI=1 STATIC=1
+	mkdir -p $(INSTALL_DIR)/data/bin $(INSTALL_DIR)/bin
+	install -m 755 dropbear/dropbearmulti $(INSTALL_DIR)/data/bin
+	ln -f -s -r $(INSTALL_DIR)/data/bin/dropbearmulti $(INSTALL_DIR)/data/bin/dropbear
+	ln -f -s -r $(INSTALL_DIR)/data/bin/dropbearmulti $(INSTALL_DIR)/data/bin/dropbearkey
+	ln -f -s -r $(INSTALL_DIR)/data/bin/dropbearmulti $(INSTALL_DIR)/bin/scp
 
 ifneq ($(strip $(BUILD_SSHD)),)
 sshd:
