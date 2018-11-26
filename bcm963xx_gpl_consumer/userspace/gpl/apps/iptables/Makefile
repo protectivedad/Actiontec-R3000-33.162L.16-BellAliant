@@ -74,34 +74,29 @@ endif
 
 check_untar_patch_configure: sanity_check check_versions
 	@if [ ! -e $(APP)/INSTALL ]; then \
-	    echo "Untarring original $(APP) source"; \
 	    (tar xkjf $(APP).tar.bz2 2> /dev/null || true); \
-	    echo "Applying patches to $(APP)"; \
 	    patch -p1 -b -s -d$(APP) < $(APP).patch; \
 	    if [ $$? -ne 0 ]; then \
 	         exit 1; \
 	    fi; \
-	    echo "Checking configure on $(APP)/configure"; \
-	    if [ -e $(APP)/configure ]; then \
-	        echo "Running configure on $(APP)"; \
-	        echo "building to $(INSTALL_DIR)"; \
-	        cd $(APP); \
-	        export PKG_CONFIG_LIBDIR=$(INSTALL_DIR)/lib/gpl; \
-	        ./configure --host=mips-linux-uclibc \
-	        --target=mips-linux-uclibc \
-			--with-pfxmods="$(PFX_EXT)" \
-			--with-pf4mods="$(PF4_EXT)" \
-			--with-pf6mods="$(PF6_EXT)" \
-			$(DO_IPV6) \
-			--disable-devel \
-			--disable-shared \
-	        --prefix=$(INSTALL_DIR) \
-			--sbindir=$(INSTALL_DIR)/bin \
-	        --libdir=$(INSTALL_DIR)/lib/gpl \
-	        --with-kbuild=$(TOOLCHAIN_INCLUDE_DIR) \
-	        LDFLAGS=-L$(INSTALL_DIR)/lib/gpl \
-	        CFLAGS=-s\ -Os\ -Wno-strict-aliasing; \
-	    fi \
+	fi
+	@if [ ! -e $(APP)/Makefile ]; then \
+	    cd $(APP); \
+	    export PKG_CONFIG_LIBDIR=$(INSTALL_DIR)/lib/gpl; \
+	    ./configure --host=mips-linux-uclibc \
+	            --target=mips-linux-uclibc \
+	            --with-pfxmods="$(PFX_EXT)" \
+	            --with-pf4mods="$(PF4_EXT)" \
+	            --with-pf6mods="$(PF6_EXT)" \
+		    $(DO_IPV6) \
+		    --disable-devel \
+		    --disable-shared \
+	            --prefix=$(INSTALL_DIR) \
+		    --sbindir=$(INSTALL_DIR)/bin \
+	            --libdir=$(INSTALL_DIR)/lib/gpl \
+	            --with-kbuild=$(TOOLCHAIN_INCLUDE_DIR) \
+	            LDFLAGS=-L$(INSTALL_DIR)/lib/gpl \
+	            CFLAGS=-s\ -Os\ -Wno-strict-aliasing; \
 	fi
 
 conditional_build: check_untar_patch_configure
