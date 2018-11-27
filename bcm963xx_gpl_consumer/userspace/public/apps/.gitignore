@@ -7,6 +7,11 @@
 !/dropbear/options.h
 /dropbear.tar.bz2
 
+/busybox/*
+!/busybox/
+!/busybox/defconfig
+/busybox.tar.bz2
+
 /bcm_boot_launcher/bcm_boot_launcher
 /bdmf_shell/bdmf_shell
 /dhrystone/dry

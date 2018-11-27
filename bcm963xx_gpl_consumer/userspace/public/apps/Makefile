@@ -13,9 +13,9 @@
 # are listed in the AUTODETECT_SUBDIRS variable.  Type make show_subdirs)
 #
 ifneq ($(strip $(AEI_CONTROL_LAYER)),)
-HARDCODED_SUBDIRS := dhcpv6-aei sshd ledctl dhrystone radvd tcpdump dropbear
+HARDCODED_SUBDIRS := dhcpv6-aei sshd ledctl dhrystone radvd tcpdump dropbear busybox
 else
-HARDCODED_SUBDIRS := dhcpv6 sshd ledctl dhrystone radvd dropbear
+HARDCODED_SUBDIRS := dhcpv6 sshd ledctl dhrystone radvd dropbear busybox
 endif
 
 
@@ -97,6 +97,17 @@ clean: generic_subdir_clean
 
 $(AUTODETECT_SUBDIRS_BASE): 
 	$(MAKE) -C $@
+
+busybox:
+	@if [ ! -e busybox/INSTALL ]; then \
+	    [ ! -e busybox.tar.bz2 ] && wget -q -O busybox.tar.bz2 https://busybox.net/downloads/busybox-1.29.3.tar.bz2 || true; \
+	    mkdir -p busybox; \
+	    (tar -C busybox --strip-components=1 -xkjf busybox.tar.bz2 2> /dev/null || true); \
+	fi
+	[ ! -e busybox/.config ] && cp busybox/defconfig busybox/.config || true
+	$(MAKE) -C busybox
+	mkdir -p $(INSTALL_DIR)/data/bin
+	install -m 755 busybox/busybox $(INSTALL_DIR)/data/bin
 
 dropbear:
 	@if [ ! -e dropbear/INSTALL ]; then \
