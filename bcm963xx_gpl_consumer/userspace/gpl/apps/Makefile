@@ -14,10 +14,11 @@
 #
 HARDCODED_SUBDIRS := atm2684 bridge-utils busybox sysstat dproxy-nexgen \
            ftpd iproute2 udhcp urlfilterd zebra \
-           dynahelper samba iperf conntrack \
+           dynahelper iperf conntrack \
            openl2tpd rng-tools-2 pptp \
            mtd-util \
-           felix_framework
+           felix_framework \
+           samba36
 
 ifneq ($(strip $(AEI_VDSL_CUSTOMER_NCS)),)
 HARDCODED_SUBDIRS += ebtables iptables jamvm-1.5.4
@@ -279,12 +280,10 @@ zebra: sanity_check
 endif
 
 ifneq ($(strip $(BUILD_SAMBA)),)
-samba: sanity_check
-	(tar xkfz samba.tar.gz 2> /dev/null || true)
-	(patch -d samba -F0 -Ns -p1 -i ../samba.patch || true)
-	$(MAKE) -C ./samba -j 1
+samba36: sanity_check
+	$(MAKE) -C ./samba36 -j 1
 else
-samba: sanity_check 
+samba36: sanity_check
 	@echo "skipping $@ (not configured)"
 endif
 
