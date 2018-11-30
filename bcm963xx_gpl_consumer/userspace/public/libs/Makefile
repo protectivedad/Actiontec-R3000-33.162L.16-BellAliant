@@ -87,16 +87,3 @@ $(AUTODETECT_SUBDIRS_BASE) $(AUTODETECT_SUBDIRS_LAYER1):
 	$(MAKE) -C $@
 
 
-# DO_BUILD_OPENSSL is set in make.common
-ifeq ($(strip $(DO_BUILD_OPENSSL))_$(strip $(BUILD_OPENSSL_VERSION_0_9_7F)),y_y)
-openssl: sanity_check
-	(tar xkfj openssl.tar.bz2 2> /dev/null || true)
-	$(MAKE) -j 1 -C openssl all
-	$(MAKE) -j 1 -C openssl install
-else
-openssl: sanity_check
-	@echo "skipping openssl 0.9.7f (not configured)"
-endif
-
-
-
