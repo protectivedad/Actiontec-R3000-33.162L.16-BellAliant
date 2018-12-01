@@ -1,0 +1,47 @@
+--- a/krb5/src/include/krb5/krb5.hin
++++ b/krb5/src/include/krb5/krb5.hin
+@@ -2335,7 +2335,7 @@ krb5_error_code KRB5_CALLCONV
+ krb5_cc_get_full_name(krb5_context context, krb5_ccache cache,
+                       char **fullname_out);
+ 
+-#if KRB5_DEPRECATED
++#if defined(KRB5_DEPRECATED)
+ krb5_error_code KRB5_CALLCONV
+ krb5_cc_gen_new(krb5_context context, krb5_ccache *cache);
+ #endif /* KRB5_DEPRECATED */
+@@ -4102,7 +4102,7 @@ krb5_build_principal(krb5_context contex
+     __attribute__ ((sentinel))
+ #endif
+     ;
+-#if KRB5_DEPRECATED
++#if defined(KRB5_DEPRECATED)
+ /** @deprecated Replaced by krb5_build_principal_alloc_va(). */
+ KRB5_ATTR_DEPRECATED krb5_error_code KRB5_CALLCONV
+ krb5_build_principal_va(krb5_context context,
+@@ -4208,7 +4208,7 @@ int KRB5_CALLCONV
+ krb5_524_convert_creds(krb5_context context, krb5_creds *v5creds,
+                        struct credentials *v4creds);
+ 
+-#if KRB5_DEPRECATED
++#if defined(KRB5_DEPRECATED)
+ #define krb524_convert_creds_kdc krb5_524_convert_creds
+ #define krb524_init_ets(x) (0)
+ #endif
+@@ -5202,7 +5202,7 @@ krb5_chpw_message(krb5_context context,
+ krb5_error_code KRB5_CALLCONV
+ krb5_get_profile(krb5_context context, struct _profile_t ** profile);
+ 
+-#if KRB5_DEPRECATED
++#if defined(KRB5_DEPRECATED)
+ /** @deprecated Replaced by krb5_get_init_creds_password().*/
+ KRB5_ATTR_DEPRECATED krb5_error_code KRB5_CALLCONV
+ krb5_get_in_tkt_with_password(krb5_context context, krb5_flags options,
+@@ -5965,7 +5965,7 @@ krb5_error_code KRB5_CALLCONV
+ krb5_auth_con_setrecvsubkey_k(krb5_context ctx, krb5_auth_context ac,
+                               krb5_key key);
+ 
+-#if KRB5_DEPRECATED
++#if defined(KRB5_DEPRECATED)
+ /** @deprecated Replaced by krb5_auth_con_getsendsubkey(). */
+ KRB5_ATTR_DEPRECATED krb5_error_code KRB5_CALLCONV
+ krb5_auth_con_getlocalsubkey(krb5_context context, krb5_auth_context auth_context,

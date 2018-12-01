@@ -12,7 +12,7 @@
 # that directory during make and make clean.  (Auto detected directories
 # are listed in the AUTODETECT_SUBDIRS variable.  Type make show_subdirs)
 #
-HARDCODED_SUBDIRS := openssl 
+HARDCODED_SUBDIRS := kerberos popt
 
 SUBDIRS = $(HARDCODED_SUBDIRS) \
           $(AUTODETECT_SUBDIRS_BASE) \
@@ -83,7 +83,5 @@ clean: generic_subdir_clean
 ##############################################################
 
 
-$(AUTODETECT_SUBDIRS_BASE) $(AUTODETECT_SUBDIRS_LAYER1): 
+$(HARDCODED_SUBDIRS) $(AUTODETECT_SUBDIRS_BASE) $(AUTODETECT_SUBDIRS_LAYER1): 
 	$(MAKE) -C $@
-
-

@@ -1,0 +1,55 @@
+--- a/krb5/src/kadmin/ktutil/ktutil_funcs.c
++++ b/krb5/src/kadmin/ktutil/ktutil_funcs.c
+@@ -64,7 +64,7 @@ krb5_error_code ktutil_delete(context, l
+     krb5_kt_list *list;
+     int idx;
+ {
+-    krb5_kt_list lp, prev;
++    krb5_kt_list lp, prev = NULL;
+     int i;
+ 
+     for (lp = *list, i = 1; lp; prev = lp, lp = lp->next, i++) {
+--- a/krb5/src/lib/kadm5/str_conv.c
++++ b/krb5/src/lib/kadm5/str_conv.c
+@@ -133,7 +133,7 @@ raw_flagspec_to_mask(const char *s, int
+ {
+     int found = 0, invert = 0;
+     size_t i;
+-    krb5_flags flag;
++    krb5_flags flag = 0;
+     unsigned long ul;
+ 
+     for (i = 0; !found && i < NFTBL; i++) {
+--- a/krb5/src/lib/krad/packet.c
++++ b/krb5/src/lib/krad/packet.c
+@@ -253,7 +253,7 @@ krad_packet_new_request(krb5_context ctx
+ {
+     krb5_error_code retval;
+     krad_packet *pkt;
+-    uchar id;
++    uchar id = 0;
+     size_t attrset_len;
+ 
+     pkt = packet_new();
+--- a/krb5/src/plugins/preauth/pkinit/pkinit_crypto_openssl.c
++++ b/krb5/src/plugins/preauth/pkinit/pkinit_crypto_openssl.c
+@@ -3764,7 +3764,7 @@ pkinit_open_session(krb5_context context
+ {
+     CK_ULONG i, r;
+     unsigned char *cp;
+-    size_t label_len;
++    size_t label_len = 0;
+     CK_ULONG count = 0;
+     CK_SLOT_ID_PTR slotlist;
+     CK_TOKEN_INFO tinfo;
+--- a/krb5/src/util/profile/prof_file.c
++++ b/krb5/src/util/profile/prof_file.c
+@@ -309,7 +309,7 @@ errcode_t profile_update_file_data_locke
+     unsigned long frac;
+     time_t now;
+ #endif
+-    FILE *f;
++    FILE *f = NULL;
+     int isdir = 0;
+ 
+ #ifdef HAVE_STAT
