@@ -114,7 +114,7 @@ if ($mirroredcfe) {
 		e("mv image2.tmp image.tmp");
             }
             if ($ubifs) {
-                e("$ENV{HOSTTOOLS_DIR}/BcmFsTag -s 2 -u $blocksize > marker.tmp");
+                e("$ENV{HOSTTOOLS_DIR}/bin/BcmFsTag -s 2 -u $blocksize > marker.tmp");
 	        e("cat image.tmp $bootfs marker.tmp $rootfs > $image");
                 e("rm marker.tmp");
             } else {
@@ -130,7 +130,7 @@ if ($mirroredcfe) {
 }
 else {
     if ($ubifs) {
-        e("$ENV{HOSTTOOLS_DIR}/BcmFsTag -s 2 -u $blocksize > marker.tmp");
+        e("$ENV{HOSTTOOLS_DIR}/bin/BcmFsTag -s 2 -u $blocksize > marker.tmp");
         e("cat bootofs.tmp $cferom fileboot.tmp | head --bytes=$bootsize | cat - $bootfs marker.tmp $rootfs > $image");
         if ($fsonly) {
             e("cat $bootfs marker.tmp $rootfs > merged.tmp");
@@ -145,15 +145,15 @@ else {
 
 if ($fsonly) {
     if ($ubifs) {
-        e("$ENV{HOSTTOOLS_DIR}/addvtoken --endian $ENV{ARCH_ENDIAN} --chip $ENV{BRCM_CHIP} --flashtype $flashtype merged.tmp $fsonly.w");
+        e("$ENV{HOSTTOOLS_DIR}/bin/addvtoken --endian $ENV{ARCH_ENDIAN} --chip $ENV{BRCM_CHIP} --flashtype $flashtype merged.tmp $fsonly.w");
         e("rm -f merged.tmp");
     }
     else {
-        e("$ENV{HOSTTOOLS_DIR}/addvtoken --endian $ENV{ARCH_ENDIAN} --chip $ENV{BRCM_CHIP} --flashtype $flashtype $rootfs $fsonly.w");
+        e("$ENV{HOSTTOOLS_DIR}/bin/addvtoken --endian $ENV{ARCH_ENDIAN} --chip $ENV{BRCM_CHIP} --flashtype $flashtype $rootfs $fsonly.w");
     }
 }
-e("$ENV{HOSTTOOLS_DIR}/addvtoken --endian $ENV{ARCH_ENDIAN} --chip $ENV{BRCM_CHIP} --flashtype $flashtype --pmc $pmcflag $image $image.w");
-e(      "$ENV{HOSTTOOLS_DIR}/createimg --boardid=$ENV{BRCM_BOARD_ID} "
+e("$ENV{HOSTTOOLS_DIR}/bin/addvtoken --endian $ENV{ARCH_ENDIAN} --chip $ENV{BRCM_CHIP} --flashtype $flashtype --pmc $pmcflag $image $image.w");
+e(      "$ENV{HOSTTOOLS_DIR}/bin/createimg --boardid=$ENV{BRCM_BOARD_ID} "
       . " --endian $ENV{ARCH_ENDIAN}"
       . " --voiceboardid $ENV{BRCM_VOICE_BOARD_ID}"
       . " --numbermac=$ENV{BRCM_NUM_MAC_ADDRESSES}"

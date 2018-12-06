@@ -18,7 +18,7 @@ if [ "$BRCM_IKOS" = "y" ]; then
    echo -e "\x23\x21bin/sh\nmount -t proc /proc /proc\nmount -t sysfs none /sys" > $TARGET_FS/etc/init.sh
    chmod +x $TARGET_FS/etc/init.sh
 # ikos is too slow for using compressed SquashFS, so we are disabling the compression. Make sure kernel creates large enough ramdisk for the uncompressed fs image
-   $HOSTTOOLS_DIR/mksquashfs $TARGET_FS $PROFILE_DIR/ramdisk -noappend -noI -noD -noF
+   $HOSTTOOLS_DIR/bin/mksquashfs $TARGET_FS $PROFILE_DIR/ramdisk -noappend -noI -noD -noF
 else
-   $HOSTTOOLS_DIR/mksquashfs $TARGET_FS $PROFILE_DIR/ramdisk -noappend -comp xz
+   $HOSTTOOLS_DIR/bin/mksquashfs $TARGET_FS $PROFILE_DIR/ramdisk -noappend -comp xz
 fi

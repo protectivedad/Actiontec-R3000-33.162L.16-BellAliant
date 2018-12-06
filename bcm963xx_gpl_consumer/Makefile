@@ -660,9 +660,9 @@ ikos:
 	@-mv -f $(FSSRC_DIR)/etc/inittab $(FSSRC_DIR)/etc/inittab.dontuse >& /dev/null
 	@sed -e 's/^::respawn.*sh.*/::respawn:-\/bin\/sh/' $(FSSRC_DIR)/etc/inittab.dontuse > $(FSSRC_DIR)/etc/inittab
 	@if [ ! -a $(CFE_FILE) ] ; then echo "no cfe" > $(CFE_FILE); echo "no cfe" > $(CFE_FILE).del; fi
-	@-rm $(HOSTTOOLS_DIR)/bcmImageBuilder >& /dev/null
+	@-rm $(HOSTTOOLS_DIR)/bin/bcmImageBuilder >& /dev/null
 	$(MAKE) PROFILE=$(PROFILE)
-	@-rm $(HOSTTOOLS_DIR)/bcmImageBuilder >& /dev/null
+	@-rm $(HOSTTOOLS_DIR)/bin/bcmImageBuilder >& /dev/null
 	@mv -f $(FSSRC_DIR)/etc/profile.dontuse $(FSSRC_DIR)/etc/profile
 	@-mv -f $(FSSRC_DIR)/etc/init.dontuse $(FSSRC_DIR)/etc/init.d >& /dev/null
 	@-mv -f $(FSSRC_DIR)/etc/inittab.dontuse $(FSSRC_DIR)/etc/inittab >& /dev/null
@@ -693,9 +693,9 @@ ikoscfe:
 	$(MAKE) -C $(BL_BUILD_DIR) ikos_finish
 	cd $(PROFILE_DIR); \
 	echo -n "** no kernel  **" > kernelfile; \
-	$(HOSTTOOLS_DIR)/bcmImageBuilder $(BRCM_ENDIAN_FLAGS) --output $(CFE_FS_KERNEL_IMAGE_NAME) --chip $(BRCM_CHIP) --board $(BRCM_BOARD_ID) --blocksize $(BRCM_FLASHBLK_SIZE) --cfefile $(BL_BUILD_DIR)/cfe$(BRCM_CHIP).bin --rootfsfile rootfs.img --kernelfile kernelfile --include-cfe; \
-	$(HOSTTOOLS_DIR)/createimg --endian $(ARCH_ENDIAN) --boardid=$(BRCM_BOARD_ID) --voiceboardid $(BRCM_VOICE_BOARD_ID) --numbermac=$(BRCM_NUM_MAC_ADDRESSES) --macaddr=$(BRCM_BASE_MAC_ADDRESS) --tp=$(BRCM_MAIN_TP_NUM) --psisize=$(BRCM_PSI_SIZE) --inputfile=$(CFE_FS_KERNEL_IMAGE_NAME) --outputfile=$(FLASH_IMAGE_NAME); \
-	$(HOSTTOOLS_DIR)/addvtoken --endian $(ARCH_ENDIAN) $(FLASH_IMAGE_NAME) $(FLASH_IMAGE_NAME).w; \
+	$(HOSTTOOLS_DIR)/bin/bcmImageBuilder $(BRCM_ENDIAN_FLAGS) --output $(CFE_FS_KERNEL_IMAGE_NAME) --chip $(BRCM_CHIP) --board $(BRCM_BOARD_ID) --blocksize $(BRCM_FLASHBLK_SIZE) --cfefile $(BL_BUILD_DIR)/cfe$(BRCM_CHIP).bin --rootfsfile rootfs.img --kernelfile kernelfile --include-cfe; \
+	$(HOSTTOOLS_DIR)/bin/createimg --endian $(ARCH_ENDIAN) --boardid=$(BRCM_BOARD_ID) --voiceboardid $(BRCM_VOICE_BOARD_ID) --numbermac=$(BRCM_NUM_MAC_ADDRESSES) --macaddr=$(BRCM_BASE_MAC_ADDRESS) --tp=$(BRCM_MAIN_TP_NUM) --psisize=$(BRCM_PSI_SIZE) --inputfile=$(CFE_FS_KERNEL_IMAGE_NAME) --outputfile=$(FLASH_IMAGE_NAME); \
+	$(HOSTTOOLS_DIR)/bin/addvtoken --endian $(ARCH_ENDIAN) $(FLASH_IMAGE_NAME) $(FLASH_IMAGE_NAME).w; \
 	$(OBJCOPY) --output-target=srec --input-target=binary --change-addresses=0xb8000000 $(FLASH_IMAGE_NAME).w $(FLASH_IMAGE_NAME).srec; \
 	$(OBJCOPY) --output-target=srec vmlinux vmlinux.srec; \
 	@rm kernelfile; \
@@ -811,7 +811,7 @@ endif
 endif
 
     ifeq ($(strip $(SKIP_TIMESTAMP_IMAGE)),)
-# copy images to images directory and add a timestamp
+#	copy images to images directory and add a timestamp
 #	find $(PROFILE_DIR) -name *_nand_cferom_*.w  -printf "%f\n" | while read name; do cp $(PROFILE_DIR)/$$name $(IMAGES_DIR)/$${name/.w/_$(BRCM_RELEASETAG)-$(shell date '+%y%m%d_%H%M').w}; done
     endif
 
@@ -823,11 +823,11 @@ ifneq ($(findstring _$(strip $(BRCM_KERNEL_ROOTFS))_,_all_ _squashfs_),)
 	cp $(KERNEL_DIR)/vmlinux . ; \
 	$(STRIP) --remove-section=.note --remove-section=.comment vmlinux; \
 	$(OBJCOPY) -O binary vmlinux vmlinux.bin; \
-	$(HOSTTOOLS_DIR)/cmplzma -k -2 vmlinux vmlinux.bin vmlinux.lz;\
-	$(HOSTTOOLS_DIR)/bcmImageBuilder $(BRCM_ENDIAN_FLAGS) --output $(FS_KERNEL_IMAGE_NAME) --chip $(or $(TAG_OVERRIDE),$(BRCM_CHIP)) --board $(BRCM_BOARD_ID) --blocksize $(BRCM_FLASHBLK_SIZE) --image-version $(IMAGE_VERSION) --cfefile $(CFE_FILE) --rootfsfile rootfs.img --kernelfile vmlinux.lz; \
-	$(HOSTTOOLS_DIR)/bcmImageBuilder $(BRCM_ENDIAN_FLAGS) --output $(CFE_FS_KERNEL_IMAGE_NAME) --chip $(or $(TAG_OVERRIDE),$(BRCM_CHIP)) --board $(BRCM_BOARD_ID) --blocksize $(BRCM_FLASHBLK_SIZE) --image-version $(IMAGE_VERSION) --cfefile $(CFE_FILE) --rootfsfile rootfs.img --kernelfile vmlinux.lz --include-cfe; \
-	$(HOSTTOOLS_DIR)/createimg --endian $(ARCH_ENDIAN) --boardid=$(BRCM_BOARD_ID) --voiceboardid $(BRCM_VOICE_BOARD_ID) --numbermac=$(BRCM_NUM_MAC_ADDRESSES) --macaddr=$(BRCM_BASE_MAC_ADDRESS) --tp=$(BRCM_MAIN_TP_NUM) --psisize=$(BRCM_PSI_SIZE) --logsize=$(BRCM_LOG_SECTION_SIZE) --auxfsprcnt=$(BRCM_AUXFS_PERCENT) --gponsn=$(BRCM_GPON_SERIAL_NUMBER) --gponpw=$(BRCM_GPON_PASSWORD) --inputfile=$(CFE_FS_KERNEL_IMAGE_NAME) --outputfile=$(FLASH_IMAGE_NAME); \
-	$(HOSTTOOLS_DIR)/addvtoken --endian $(ARCH_ENDIAN) --chip $(or $(TAG_OVERRIDE),$(BRCM_CHIP)) --flashtype NOR $(FLASH_IMAGE_NAME) $(FLASH_IMAGE_NAME).w
+	$(HOSTTOOLS_DIR)/bin/cmplzma -k -2 vmlinux vmlinux.bin vmlinux.lz;\
+	$(HOSTTOOLS_DIR)/bin/bcmImageBuilder $(BRCM_ENDIAN_FLAGS) --output $(FS_KERNEL_IMAGE_NAME) --chip $(or $(TAG_OVERRIDE),$(BRCM_CHIP)) --board $(BRCM_BOARD_ID) --blocksize $(BRCM_FLASHBLK_SIZE) --image-version $(IMAGE_VERSION) --cfefile $(CFE_FILE) --rootfsfile rootfs.img --kernelfile vmlinux.lz; \
+	$(HOSTTOOLS_DIR)/bin/bcmImageBuilder $(BRCM_ENDIAN_FLAGS) --output $(CFE_FS_KERNEL_IMAGE_NAME) --chip $(or $(TAG_OVERRIDE),$(BRCM_CHIP)) --board $(BRCM_BOARD_ID) --blocksize $(BRCM_FLASHBLK_SIZE) --image-version $(IMAGE_VERSION) --cfefile $(CFE_FILE) --rootfsfile rootfs.img --kernelfile vmlinux.lz --include-cfe; \
+	$(HOSTTOOLS_DIR)/bin/createimg --endian $(ARCH_ENDIAN) --boardid=$(BRCM_BOARD_ID) --voiceboardid $(BRCM_VOICE_BOARD_ID) --numbermac=$(BRCM_NUM_MAC_ADDRESSES) --macaddr=$(BRCM_BASE_MAC_ADDRESS) --tp=$(BRCM_MAIN_TP_NUM) --psisize=$(BRCM_PSI_SIZE) --logsize=$(BRCM_LOG_SECTION_SIZE) --auxfsprcnt=$(BRCM_AUXFS_PERCENT) --gponsn=$(BRCM_GPON_SERIAL_NUMBER) --gponpw=$(BRCM_GPON_PASSWORD) --inputfile=$(CFE_FS_KERNEL_IMAGE_NAME) --outputfile=$(FLASH_IMAGE_NAME); \
+	$(HOSTTOOLS_DIR)/bin/addvtoken --endian $(ARCH_ENDIAN) --chip $(or $(TAG_OVERRIDE),$(BRCM_CHIP)) --flashtype NOR $(FLASH_IMAGE_NAME) $(FLASH_IMAGE_NAME).w
 
     ifeq ($(strip $(SKIP_TIMESTAMP_IMAGE)),)
 # copy images to images directory and add a timestamp
@@ -846,30 +846,30 @@ ifneq ($(strip $(AEI_CONFIG_JFFS)),)
 ifneq ($(strip $(AEI_SIGNED_FIRMWARE)),)
 ifneq ($(strip $(AEI_TWO_IN_ONE_FIRMWARE)),)
 	cd $(PROFILE_DIR); \
-	$(HOSTTOOLS_DIR)/AEINandImageBuilder $(BRCM_ENDIAN_FLAGS) --output rootfs16kbtagg.img --release $(BRCM_RELEASETAG) --release2 $(BRCM_RELEASETAG2) --chip $(BRCM_CHIP) --board $(BRCM_BOARD_ID) --blocksize 16  --rootfsfile rootfs16kb.img ; \
-	$(HOSTTOOLS_DIR)/AEINandImageBuilder $(BRCM_ENDIAN_FLAGS) --output rootfs128kbtagg.img --release $(BRCM_RELEASETAG) --release2 $(BRCM_RELEASETAG2) --chip $(BRCM_CHIP) --board $(BRCM_BOARD_ID) --blocksize 128  --rootfsfile jffs2_rootfs128kb.img ;
+	$(HOSTTOOLS_DIR)/bin/AEINandImageBuilder $(BRCM_ENDIAN_FLAGS) --output rootfs16kbtagg.img --release $(BRCM_RELEASETAG) --release2 $(BRCM_RELEASETAG2) --chip $(BRCM_CHIP) --board $(BRCM_BOARD_ID) --blocksize 16  --rootfsfile rootfs16kb.img ; \
+	$(HOSTTOOLS_DIR)/bin/AEINandImageBuilder $(BRCM_ENDIAN_FLAGS) --output rootfs128kbtagg.img --release $(BRCM_RELEASETAG) --release2 $(BRCM_RELEASETAG2) --chip $(BRCM_CHIP) --board $(BRCM_BOARD_ID) --blocksize 128  --rootfsfile jffs2_rootfs128kb.img ;
 else #AEI_TWO_IN_ONE_FIRMWARE
 	cd $(PROFILE_DIR); \
-	$(HOSTTOOLS_DIR)/AEINandImageBuilder $(BRCM_ENDIAN_FLAGS) --output bootfs128kbtagg.img --release $(BRCM_RELEASETAG) $(IMAGE_BUILD_OPTION_RELEASE2) $(BRCM_RELEASETAG2) --chip $(BRCM_CHIP) --board $(BRCM_BOARD_ID) --blocksize 128  --rootfsfile bootfs128kb.img ; \
+	$(HOSTTOOLS_DIR)/bin/AEINandImageBuilder $(BRCM_ENDIAN_FLAGS) --output bootfs128kbtagg.img --release $(BRCM_RELEASETAG) $(IMAGE_BUILD_OPTION_RELEASE2) $(BRCM_RELEASETAG2) --chip $(BRCM_CHIP) --board $(BRCM_BOARD_ID) --blocksize 128  --rootfsfile bootfs128kb.img ; \
 	$(BUILD_DIR)/userspace/private/apps/AEIImageBuilder/AEIImageBuilder $(BRCM_ENDIAN_FLAGS) --sdkversion 6 --customer $(ACT_CUSTOMER) --model $(ACT_SIGN_IMAGE_MODEL) --input bootfs128kbtagg.img --output bootfs128kbtag.img; \
    $(HOSTTOOLS_DIR)/scripts/bcmImageMaker --cferom $(CFE_ROM_FILE) --blocksize $(FLASH_NAND_BLOCK_128KB) --bootofs $(AEI_BOOT_OF_START) --bootsize 131072 --ubifs --bootfs bootfs128kbtag.img --rootfs ubi_rootfs128kb.img --image $(FLASH_NAND_CFEROM_FS_IMAGE_NAME_128)_ubi_tag_signed --fsonly    $(FLASH_NAND_FS_IMAGE_NAME_128)_ubi_tag_signed; \
-	$(HOSTTOOLS_DIR)/AEINandImageBuilder $(BRCM_ENDIAN_FLAGS) --output rootfs128kbtagg.img --release $(BRCM_RELEASETAG) --chip $(BRCM_CHIP) --board $(BRCM_BOARD_ID) --blocksize 128  --rootfsfile jffs2_rootfs128kb.img ; \
+	$(HOSTTOOLS_DIR)/bin/AEINandImageBuilder $(BRCM_ENDIAN_FLAGS) --output rootfs128kbtagg.img --release $(BRCM_RELEASETAG) --chip $(BRCM_CHIP) --board $(BRCM_BOARD_ID) --blocksize 128  --rootfsfile jffs2_rootfs128kb.img ; \
 	$(BUILD_DIR)/userspace/private/apps/AEIImageBuilder/AEIImageBuilder $(BRCM_ENDIAN_FLAGS) --sdkversion 6 --customer $(ACT_CUSTOMER) --model $(ACT_SIGN_IMAGE_MODEL) --input rootfs128kbtagg.img --output rootfs128kbtag.img ; \
     $(HOSTTOOLS_DIR)/scripts/bcmImageMaker --cferom $(CFE_ROM_FILE) --blocksize $(FLASH_NAND_BLOCK_128KB) --bootofs $(AEI_BOOT_OF_START) --bootsize 131072 --rootfs rootfs128kbtag.img --image $(FLASH_NAND_CFEROM_FS_IMAGE_NAME_128)_jffs2_tag_signed --fsonly $(FLASH_NAND_FS_IMAGE_NAME_128)_jffs2_tag_signed; 
 endif #AEI_TWO_IN_ONE_FIRMWARE
 else #AEI_SIGNED_FIRMWARE
     ifeq ($(strip $(BUILD_NAND_IMG_BLKSIZE_128KB)),y)
 	cd $(PROFILE_DIR); \
-	$(HOSTTOOLS_DIR)/AEINandImageBuilder $(BRCM_ENDIAN_FLAGS) --output rootfs128kbtag.img --release $(BRCM_RELEASETAG) $(IMAGE_BUILD_OPTION_RELEASE2) $(BRCM_RELEASETAG2) --chip $(BRCM_CHIP) --board $(BRCM_BOARD_ID) --blocksize 128  --rootfsfile jffs2_rootfs128kb.img ; \
+	$(HOSTTOOLS_DIR)/bin/AEINandImageBuilder $(BRCM_ENDIAN_FLAGS) --output rootfs128kbtag.img --release $(BRCM_RELEASETAG) $(IMAGE_BUILD_OPTION_RELEASE2) $(BRCM_RELEASETAG2) --chip $(BRCM_CHIP) --board $(BRCM_BOARD_ID) --blocksize 128  --rootfsfile jffs2_rootfs128kb.img ; \
     $(HOSTTOOLS_DIR)/scripts/bcmImageMaker --cferom $(CFE_ROM_FILE) --blocksize $(FLASH_NAND_BLOCK_128KB) --bootofs $(AEI_BOOT_OF_START) --bootsize 131072 --rootfs rootfs128kbtag.img --image $(FLASH_NAND_CFEROM_FS_IMAGE_NAME_128)_jffs2_tag --fsonly $(FLASH_NAND_FS_IMAGE_NAME_128)_jffs2_tag; \
-	$(HOSTTOOLS_DIR)/AEINandImageBuilder $(BRCM_ENDIAN_FLAGS) --output bootfs128kbtag.img --release $(BRCM_RELEASETAG) $(IMAGE_BUILD_OPTION_RELEASE2) $(BRCM_RELEASETAG2) --chip $(BRCM_CHIP) --board $(BRCM_BOARD_ID) --blocksize 128  --rootfsfile bootfs128kb.img ; \
-   $(HOSTTOOLS_DIR)/scripts/bcmImageMaker --cferom $(CFE_ROM_FILE) --blocksize $(FLASH_NAND_BLOCK_128KB) --bootofs $(AEI_BOOT_OF_START) --bootsize 131072  --ubifs --bootfs bootfs128kbtag.img --rootfs ubi_rootfs128kb.img --image $(FLASH_NAND_CFEROM_FS_IMAGE_NAME_128)_ubi_tag --fsonly    $(FLASH_NAND_FS_IMAGE_NAME_128)_ubi_tag;
+	$(HOSTTOOLS_DIR)/bin/AEINandImageBuilder $(BRCM_ENDIAN_FLAGS) --output bootfs128kbtag.img --release $(BRCM_RELEASETAG) $(IMAGE_BUILD_OPTION_RELEASE2) $(BRCM_RELEASETAG2) --chip $(BRCM_CHIP) --board $(BRCM_BOARD_ID) --blocksize 128  --rootfsfile bootfs128kb.img ; \
+    $(HOSTTOOLS_DIR)/scripts/bcmImageMaker --cferom $(CFE_ROM_FILE) --blocksize $(FLASH_NAND_BLOCK_128KB) --bootofs $(AEI_BOOT_OF_START) --bootsize 131072  --ubifs --bootfs bootfs128kbtag.img --rootfs ubi_rootfs128kb.img --image $(FLASH_NAND_CFEROM_FS_IMAGE_NAME_128)_ubi_tag --fsonly    $(FLASH_NAND_FS_IMAGE_NAME_128)_ubi_tag;
     endif
     ifeq ($(strip $(BUILD_NAND_IMG_BLKSIZE_16KB)),y)
 	cd $(PROFILE_DIR); \
-	$(HOSTTOOLS_DIR)/AEINandImageBuilder $(BRCM_ENDIAN_FLAGS) --output rootfs16kbtag.img --release $(BRCM_RELEASETAG) $(IMAGE_BUILD_OPTION_RELEASE2) $(BRCM_RELEASETAG2) --chip $(BRCM_CHIP) --board $(BRCM_BOARD_ID) --blocksize 16  --rootfsfile jffs2_rootfs16kb.img ; \
+	$(HOSTTOOLS_DIR)/bin/AEINandImageBuilder $(BRCM_ENDIAN_FLAGS) --output rootfs16kbtag.img --release $(BRCM_RELEASETAG) $(IMAGE_BUILD_OPTION_RELEASE2) $(BRCM_RELEASETAG2) --chip $(BRCM_CHIP) --board $(BRCM_BOARD_ID) --blocksize 16  --rootfsfile jffs2_rootfs16kb.img ; \
     $(HOSTTOOLS_DIR)/scripts/bcmImageMaker --cferom $(CFE_ROM_FILE) --blocksize $(FLASH_NAND_BLOCK_16KB) --bootofs $(AEI_BOOT_OF_START) --bootsize 131072 --rootfs rootfs16kbtag.img --image $(FLASH_NAND_CFEROM_FS_IMAGE_NAME_16)_jffs2_tag --fsonly $(FLASH_NAND_FS_IMAGE_NAME_16)_jffs2_tag; \
-	$(HOSTTOOLS_DIR)/AEINandImageBuilder $(BRCM_ENDIAN_FLAGS) --output bootfs16kbtag.img --release $(BRCM_RELEASETAG) $(IMAGE_BUILD_OPTION_RELEASE2) $(BRCM_RELEASETAG2) --chip $(BRCM_CHIP) --board $(BRCM_BOARD_ID) --blocksize 16  --rootfsfile bootfs16kb.img ; \
+	$(HOSTTOOLS_DIR)/bin/AEINandImageBuilder $(BRCM_ENDIAN_FLAGS) --output bootfs16kbtag.img --release $(BRCM_RELEASETAG) $(IMAGE_BUILD_OPTION_RELEASE2) $(BRCM_RELEASETAG2) --chip $(BRCM_CHIP) --board $(BRCM_BOARD_ID) --blocksize 16  --rootfsfile bootfs16kb.img ; \
    $(HOSTTOOLS_DIR)/scripts/bcmImageMaker --cferom $(CFE_ROM_FILE) --blocksize $(FLASH_NAND_BLOCK_16KB) --bootofs $(AEI_BOOT_OF_START) --bootsize 131072  --ubifs --bootfs bootfs16kbtag.img --rootfs ubi_rootfs16kb.img --image $(FLASH_NAND_CFEROM_FS_IMAGE_NAME_16)_ubi_tag --fsonly    $(FLASH_NAND_FS_IMAGE_NAME_16)_ubi_tag;
    endif
 endif #AEI_SIGNED_FIRMWARE
@@ -892,19 +892,19 @@ nandcfeimage: hosttools_nandcfe
 	cp $(PROFILE_DIR)/../cfe/cfe$(BRCM_CHIP_WVER)ram.bin $(TARGET_FS)/cferam.000
 	echo -e "/cferam.000" > $(HOSTTOOLS_DIR)/nocomprlist
 ifeq ($(strip $(BUILD_NAND_IMG_BLKSIZE_16KB)),y)
-	$(HOSTTOOLS_DIR)/mkfs.jffs2 -v $(BRCM_ENDIAN_FLAGS) -p -n -e $(FLASH_NAND_BLOCK_16KB) -r $(TARGET_FS) -o $(PROFILE_DIR)/rootfs16kb.img -N $(HOSTTOOLS_DIR)/nocomprlist
+	$(HOSTTOOLS_DIR)/bin/mkfs.jffs2 -v $(BRCM_ENDIAN_FLAGS) -p -n -e $(FLASH_NAND_BLOCK_16KB) -r $(TARGET_FS) -o $(PROFILE_DIR)/rootfs16kb.img -N $(HOSTTOOLS_DIR)/nocomprlist
 endif
 ifeq ($(strip $(BUILD_NAND_IMG_BLKSIZE_128KB)),y)
-	$(HOSTTOOLS_DIR)/mkfs.jffs2 -v $(BRCM_ENDIAN_FLAGS) -p -n -e $(FLASH_NAND_BLOCK_128KB) -r $(TARGET_FS) -o $(PROFILE_DIR)/rootfs128kb.img -N $(HOSTTOOLS_DIR)/nocomprlist
+	$(HOSTTOOLS_DIR)/bin/mkfs.jffs2 -v $(BRCM_ENDIAN_FLAGS) -p -n -e $(FLASH_NAND_BLOCK_128KB) -r $(TARGET_FS) -o $(PROFILE_DIR)/rootfs128kb.img -N $(HOSTTOOLS_DIR)/nocomprlist
 endif
 ifeq ($(strip $(BUILD_NAND_IMG_BLKSIZE_256KB)),y)
-	$(HOSTTOOLS_DIR)/mkfs.jffs2 -v $(BRCM_ENDIAN_FLAGS) -p -n -e $(FLASH_NAND_BLOCK_256KB) -r $(TARGET_FS) -o $(PROFILE_DIR)/rootfs256kb.img -N $(HOSTTOOLS_DIR)/nocomprlist
+	$(HOSTTOOLS_DIR)/bin/mkfs.jffs2 -v $(BRCM_ENDIAN_FLAGS) -p -n -e $(FLASH_NAND_BLOCK_256KB) -r $(TARGET_FS) -o $(PROFILE_DIR)/rootfs256kb.img -N $(HOSTTOOLS_DIR)/nocomprlist
 endif
 ifeq ($(strip $(BUILD_NAND_IMG_BLKSIZE_512KB)),y)
-	$(HOSTTOOLS_DIR)/mkfs.jffs2 -v $(BRCM_ENDIAN_FLAGS) -p -n -e $(FLASH_NAND_BLOCK_512KB) -r $(TARGET_FS) -o $(PROFILE_DIR)/rootfs512kb.img -N $(HOSTTOOLS_DIR)/nocomprlist
+	$(HOSTTOOLS_DIR)/bin/mkfs.jffs2 -v $(BRCM_ENDIAN_FLAGS) -p -n -e $(FLASH_NAND_BLOCK_512KB) -r $(TARGET_FS) -o $(PROFILE_DIR)/rootfs512kb.img -N $(HOSTTOOLS_DIR)/nocomprlist
 endif
 ifeq ($(strip $(BUILD_NAND_IMG_BLKSIZE_1024KB)),y)
-	$(HOSTTOOLS_DIR)/mkfs.jffs2 -v $(BRCM_ENDIAN_FLAGS) -p -n -e $(FLASH_NAND_BLOCK_1024KB) -r $(TARGET_FS) -o $(PROFILE_DIR)/rootfs1024kb.img -N $(HOSTTOOLS_DIR)/nocomprlist
+	$(HOSTTOOLS_DIR)/bin/mkfs.jffs2 -v $(BRCM_ENDIAN_FLAGS) -p -n -e $(FLASH_NAND_BLOCK_1024KB) -r $(TARGET_FS) -o $(PROFILE_DIR)/rootfs1024kb.img -N $(HOSTTOOLS_DIR)/nocomprlist
 endif
 
 ifeq ($(strip $(BUILD_SECURE_BOOT)),y)
@@ -912,19 +912,19 @@ ifeq ($(strip $(BUILD_SECURE_BOOT)),y)
 	mv $(PROFILE_DIR)/../cfe/cfesec$(BRCM_CHIP)ram.bin $(TARGET_FS)/secram.000
 	echo -e "/secram.000" >> $(HOSTTOOLS_DIR)/nocomprlist
 ifeq ($(strip $(BUILD_NAND_IMG_BLKSIZE_16KB)),y)
-	$(HOSTTOOLS_DIR)/mkfs.jffs2 -v $(BRCM_ENDIAN_FLAGS) -p -n -e $(FLASH_NAND_BLOCK_16KB) -r $(TARGET_FS) -o $(PROFILE_DIR)/rootfs16kb_secureboot.img -N $(HOSTTOOLS_DIR)/nocomprlist
+	$(HOSTTOOLS_DIR)/bin/mkfs.jffs2 -v $(BRCM_ENDIAN_FLAGS) -p -n -e $(FLASH_NAND_BLOCK_16KB) -r $(TARGET_FS) -o $(PROFILE_DIR)/rootfs16kb_secureboot.img -N $(HOSTTOOLS_DIR)/nocomprlist
 endif
 ifeq ($(strip $(BUILD_NAND_IMG_BLKSIZE_128KB)),y)
-	$(HOSTTOOLS_DIR)/mkfs.jffs2 -v $(BRCM_ENDIAN_FLAGS) -p -n -e $(FLASH_NAND_BLOCK_128KB) -r $(TARGET_FS) -o $(PROFILE_DIR)/rootfs128kb_secureboot.img -N $(HOSTTOOLS_DIR)/nocomprlist
+	$(HOSTTOOLS_DIR)/bin/mkfs.jffs2 -v $(BRCM_ENDIAN_FLAGS) -p -n -e $(FLASH_NAND_BLOCK_128KB) -r $(TARGET_FS) -o $(PROFILE_DIR)/rootfs128kb_secureboot.img -N $(HOSTTOOLS_DIR)/nocomprlist
 endif
 ifeq ($(strip $(BUILD_NAND_IMG_BLKSIZE_256KB)),y)
-	$(HOSTTOOLS_DIR)/mkfs.jffs2 -v $(BRCM_ENDIAN_FLAGS) -p -n -e $(FLASH_NAND_BLOCK_256KB) -r $(TARGET_FS) -o $(PROFILE_DIR)/rootfs256kb_secureboot.img -N $(HOSTTOOLS_DIR)/nocomprlist
+	$(HOSTTOOLS_DIR)/bin/mkfs.jffs2 -v $(BRCM_ENDIAN_FLAGS) -p -n -e $(FLASH_NAND_BLOCK_256KB) -r $(TARGET_FS) -o $(PROFILE_DIR)/rootfs256kb_secureboot.img -N $(HOSTTOOLS_DIR)/nocomprlist
 endif
 ifeq ($(strip $(BUILD_NAND_IMG_BLKSIZE_512KB)),y)
-	$(HOSTTOOLS_DIR)/mkfs.jffs2 -v $(BRCM_ENDIAN_FLAGS) -p -n -e $(FLASH_NAND_BLOCK_512KB) -r $(TARGET_FS) -o $(PROFILE_DIR)/rootfs512kb_secureboot.img -N $(HOSTTOOLS_DIR)/nocomprlist
+	$(HOSTTOOLS_DIR)/bin/mkfs.jffs2 -v $(BRCM_ENDIAN_FLAGS) -p -n -e $(FLASH_NAND_BLOCK_512KB) -r $(TARGET_FS) -o $(PROFILE_DIR)/rootfs512kb_secureboot.img -N $(HOSTTOOLS_DIR)/nocomprlist
 endif
 ifeq ($(strip $(BUILD_NAND_IMG_BLKSIZE_1024KB)),y)
-	$(HOSTTOOLS_DIR)/mkfs.jffs2 -v $(BRCM_ENDIAN_FLAGS) -p -n -e $(FLASH_NAND_BLOCK_1024KB) -r $(TARGET_FS) -o $(PROFILE_DIR)/rootfs1024kb_secureboot.img -N $(HOSTTOOLS_DIR)/nocomprlist
+	$(HOSTTOOLS_DIR)/bin/mkfs.jffs2 -v $(BRCM_ENDIAN_FLAGS) -p -n -e $(FLASH_NAND_BLOCK_1024KB) -r $(TARGET_FS) -o $(PROFILE_DIR)/rootfs1024kb_secureboot.img -N $(HOSTTOOLS_DIR)/nocomprlist
 endif
 endif
 	rm $(HOSTTOOLS_DIR)/nocomprlist
