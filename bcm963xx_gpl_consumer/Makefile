@@ -287,6 +287,8 @@ define pre_kernelbuild
 	  echo "Untarring original Linux kernel source: $(LINUX_ZIP_FILE)"; \
 	  (tar xkfpj $(LINUX_ZIP_FILE) 2> /dev/null || true); \
 	fi
+	[ ! -e $(KERNEL_DIR)/fs/exfat ] && \
+	  git clone --depth=1 https://github.com/dorimanx/exfat-nofuse.git $(KERNEL_DIR)/fs/exfat || true
 	$(GENDEFCONFIG_CMD) $(PROFILE_PATH) ${MAKEFLAGS} $(ACT_OPTIONS) ${GENDEFFLAG}
 	cd $(KERNEL_DIR); \
 	cp -f $(KERNEL_DIR)/arch/$(ARCH)/defconfig $(KERNEL_DIR)/.config; \
