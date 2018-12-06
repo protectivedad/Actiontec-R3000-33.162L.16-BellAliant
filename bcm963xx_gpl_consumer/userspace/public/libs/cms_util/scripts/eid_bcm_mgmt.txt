@@ -69,15 +69,6 @@ BEGIN
 END
 
 BEGIN
-  eid         = EID_SSHD            /*      7 */
-  accessBit   = NDA_ACCESS_SSHD     /* 0x0040 */
-  name        = sshd
-  flags = EIF_MDM|EIF_SERVER|EIF_SERVER_TCP|EIF_MESSAGING_CAPABLE|EIF_DESKTOP_LINUX_CAPABLE|EIF_IPV6
-  backLog     = 3
-  port        = SSHD_PORT
-END
-
-BEGIN
   eid         = EID_UPNP            /*      8 */
   accessBit   = NDA_ACCESS_UPNP     /* 0x0080 */
   name        = upnp
