@@ -102,3 +102,4 @@ initramfs
 /*.sh
 
 arch/arm/defconfig
+fs/exfat
