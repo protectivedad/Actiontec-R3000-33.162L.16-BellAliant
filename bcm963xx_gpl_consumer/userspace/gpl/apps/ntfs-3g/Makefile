@@ -1,11 +1,5 @@
-#***********************************************************************
-#
-#  Copyright (c) 2012  Broadcom Corporation
-#  All Rights Reserved
-#
-#***********************************************************************/
 
-all dynamic install: conditional_build
+conditional_build: all
 
 #
 # Set our CommEngine directory (by splitting the pwd into two words
@@ -19,44 +13,62 @@ BUILD_DIR:=$(word 1, $(BUILD_DIR))
 
 include $(BUILD_DIR)/make.common
 
-APP = ntfs-3g_ntfsprogs-2014.2.15
-SO_VER = 85
+LOC = https://tuxera.com/opensource/
+APP = ntfs-3g_ntfsprogs-2017.3.23
+FILE = $(APP).tgz
+
+export LINUX_VER_STR TOOLCHAIN_PREFIX
+CONFIG_ID_FILE = $(APP)/CONFIG_ID_$(TOOLCHAIN_PREFIX)_$(LINUX_VER_STR)
+PATCH_ID_FILE = $(APP)/PATCH_ID_$(TOOLCHAIN_PREFIX)_$(LINUX_VER_STR)
+SOURCE_ID_FILE = $(APP)/SOURCE_ID_$(TOOLCHAIN_PREFIX)_$(LINUX_VER_STR)
+
+CONFIGURE_VARS := \
+	PKG_CONFIG_LIBDIR=$(BCM_FSBUILD_DIR)/public/lib \
+	PKG_CONFIG_PATH=$(BCM_FSBUILD_DIR)/public/lib/pkgconfig
+
+CONFIGURE_ARGS := \
+	--host=$(TOOLCHAIN_PREFIX) \
+	--target=$(TOOLCHAIN_PREFIX) \
+	--prefix=/ \
+	--enable-shared \
+	--enable-static \
+	--with-fuse=external
 
 clean:
-	@if [ -e $(APP)/Makefile ]; then \
-	cd $(APP); $(MAKE) distclean ; \
-	fi
+	[ -e $(CONFIG_ID_FILE) ] && ($(MAKE) -C $(APP) distclean; rm $(CONFIG_ID_FILE)) || true
 
 # The next line is a hint to our release scripts
 # GLOBAL_RELEASE_SCRIPT_CALL_DISTCLEAN
-distclean: clean
+distclean:
 	rm -rf $(APP)
 
 #.PHONY: check_untar_patch_configure conditional_build
 
-ifneq ($(strip $(BUILD_NTFS_3G)),)
+check_untar:
+	@if [ ! -e $(SOURCE_ID_FILE) ]; then \
+		[ ! -e $(FILE) ] && wget $(LOC)/$(FILE) || true; \
+		(tar xkzf $(FILE) 2> /dev/null || true); \
+	fi
+	@echo "NTFS-3G is untarred"
+	@touch $(SOURCE_ID_FILE)
 
-check_untar_patch_configure: sanity_check
-	@if [ ! -e $(APP)/Makefile.in ]; then \
-    	echo "Untarring original $(APP) source"; \
-	    (tar xkf $(APP).tar.bz2 2> /dev/null || true); \
-    	echo "Applying patches to $(APP)"; \
-	    patch -p1 -b -s -d$(APP) < $(APP).patch; \
-	    if [ $$? -ne 0 ]; then\
-            exit 1;\
-        fi; \
-        fi; \
-	    (cd $(APP); ./configure --host=$(TOOLCHAIN_PREFIX) \
-        --target=$(TOOLCHAIN_PREFIX) \
-        --disable-developer \
-        --prefix=$(INSTALL_DIR) \
-        --sbindir=$(INSTALL_DIR)/bin); 
+check_patch: check_untar
+	[ ! -e $(PATCH_ID_FILE) ] && patch -p1 -b -s -d$(APP) < $(APP).patch || true
+	@echo "NTFS-3G is patched"
+	@touch $(PATCH_ID_FILE)
 
-conditional_build: check_untar_patch_configure
-	cd $(APP); $(MAKE) 
-	install -m 755 $(APP)/libntfs-3g/.libs/libntfs-3g.so $(INSTALL_DIR)/lib/libntfs-3g.so.$(SO_VER)
+check_config: check_patch
+	[ ! -e $(CONFIG_ID_FILE) ] && ( \
+		cd $(APP); \
+		$(MAKE) distclean; \
+		$(CONFIGURE_VARS) ./configure $(CONFIGURE_ARGS);) || true
+	@echo "NTFS-3G is configured"
+	@touch $(CONFIG_ID_FILE)
+
+all: sanity_check check_config
+	$(MAKE) -C $(APP)
+	@cp $(APP)/libntfs-3g/.libs/libntfs-3g.so* $(INSTALL_DIR)/lib
 	install -m 755 $(APP)/src/.libs/ntfs-3g  $(INSTALL_DIR)/bin/ntfs-3g	
-else
-conditional_build: sanity_check
-	@echo "skipping $(APP) (not configured)"
-endif
+
+shell:
+	bash -i
