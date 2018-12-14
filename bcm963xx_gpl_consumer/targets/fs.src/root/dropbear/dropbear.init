@@ -5,6 +5,7 @@
 
 start() {
 	DROPBEAR_ARGS="-p 22 -r /data/dropbear/dropbear_ecdsa_host_key -r /data/dropbear/dropbear_rsa_host_key"
+	DROPBEAR_ARGS_9122="-p 9122 -r /data/dropbear/dropbear_ecdsa_host_key -r /data/dropbear/dropbear_rsa_host_key"
 
 	# Open firewall to receive connections
 	iptables -D INPUT -i br0 -p tcp -m tcp --dport 22 -j DROP
@@ -12,12 +13,16 @@ start() {
 	# Give root user a home directory
 	sed -i -e 's/:Administrator:\/:/:Administrator:\/data\/dropbear:/g' /var/passwd
 
+	# Make scp accessible somewhere in the path
+	mount --bind /data/dropbear /opt/bin
+
 	umask 077
-	/usr/sbin/dropbear $DROPBEAR_ARGS
+	/usr/sbin/dropbear $DROPBEAR_ARGS || /usr/sbin/dropbear $DROPBEAR_ARGS_9122
 }
 stop() {
 	kill `cat /var/run/dropbear.pid`
 	iptables -A INPUT -i br0 -p tcp -m tcp --dport 22 -j DROP
+	umount /opt/bin
 }
 restart() {
 	stop
