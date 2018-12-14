@@ -1,5 +1,5 @@
 
-all dynamic install: conditional_build
+all dynamic : install
 
 #
 # Set our CommEngine directory (by splitting the pwd into two words
@@ -13,10 +13,17 @@ BUILD_DIR:=$(word 1, $(BUILD_DIR))
 
 include $(BUILD_DIR)/make.common
 
-LOC = https://web.mit.edu/kerberos/dist/krb5/1.16
 APP = krb5
 VERS = 1.16.2
 FILE = $(APP)-$(VERS).tar.gz
+LOC = https://web.mit.edu/kerberos/dist/krb5/1.16
+
+SERVER_LIBS = \
+	$(BCM_FSBUILD_DIR)/public/lib/libcom_err.so* \
+	$(BCM_FSBUILD_DIR)/public/lib/libk5crypto.so* \
+	$(BCM_FSBUILD_DIR)/public/lib/libkrb5.so* \
+	$(BCM_FSBUILD_DIR)/public/lib/libgssapi_krb5.so* \
+	$(BCM_FSBUILD_DIR)/public/lib/libkrb5support.so*
 
 CONFIGURE_VARS := \
 	PKG_CONFIG_LIBDIR=$(BCM_FSBUILD_DIR)/public/lib \
@@ -42,47 +49,49 @@ CONFIGURE_ARGS := \
 	--without-libedit \
 	--without-readline \
 	--without-system-verto \
-	--with-crypto-impl=openssl \
+	--with-size-optimizations \
 	--disable-nls
 
 export LINUX_VER_STR TOOLCHAIN_PREFIX
-CONFIG_ID_FILE = $(APP)/CONFIG_ID_$(TOOLCHAIN_PREFIX)_$(LINUX_VER_STR)
-PATCH_ID_FILE = $(APP)/PATCH_ID_$(TOOLCHAIN_PREFIX)_$(LINUX_VER_STR)
-SOURCE_ID_FILE = $(APP)/SOURCE_ID_$(TOOLCHAIN_PREFIX)_$(LINUX_VER_STR)
+CONFIG_ID_FILE = $(CURR_DIR)/$(APP)-CONFIG_ID_$(TOOLCHAIN_PREFIX)_$(LINUX_VER_STR)
+PATCH_ID_FILE = $(CURR_DIR)/$(APP)-PATCH_ID_$(TOOLCHAIN_PREFIX)_$(LINUX_VER_STR)
+SOURCE_ID_FILE = $(CURR_DIR)/$(APP)-SOURCE_ID_$(TOOLCHAIN_PREFIX)_$(LINUX_VER_STR)
+COMPILE_ID_FILE = $(CURR_DIR)/$(APP)-COMPILE_ID_$(TOOLCHAIN_PREFIX)_$(LINUX_VER_STR)
 
-.PHONY: conditional_build
+.PHONY: install clean distclean
 
-check_untar:
-	@if [ ! -e $(SOURCE_ID_FILE) ]; then \
-		[ ! -e $(FILE) ] && wget -O $(FILE) $(LOC)/$(FILE) || true; \
-		mkdir -p $(APP); \
-		(tar -C $(APP) --strip-components=1 -xkf $(FILE) 2> /dev/null || true); \
-	fi
+$(FILE):
+	wget -O $(FILE) $(LOC)/$(FILE)
+
+$(SOURCE_ID_FILE) : $(FILE)
+	@mkdir -p $(APP)
+	(tar -C $(APP) --strip-components=1 -xkf $(FILE) 1>$(SOURCE_ID_FILE) 2>&1 || true)
 	@echo "$(APP) is untarred"
-	@touch $(SOURCE_ID_FILE)
 
-check_patch: check_untar
-	[ ! -e krb5/$(PATCH_ID_FILE) ] && quilt push -a || true
-	@echo "$(APP) is patched"
+$(PATCH_ID_FILE) : $(SOURCE_ID_FILE)
+	quilt push -a || true
 	@touch $(PATCH_ID_FILE)
+	@echo "$(APP) is patched"
 
-check_config: check_patch
-	[ ! -e $(CONFIG_ID_FILE) ] && ( \
-		cd $(APP)/src; \
-		$(MAKE) distclean; \
-		$(CONFIGURE_VARS) ./configure $(CONFIGURE_ARGS);) || true
+$(CONFIG_ID_FILE) : $(PATCH_ID_FILE)
+	$(MAKE) clean
+	@cd $(APP)/src; $(CONFIGURE_VARS) ./configure $(CONFIGURE_ARGS) 1>$(CONFIG_ID_FILE) 2>&1
 	@echo "$(APP) is configured"
-	@touch $(CONFIG_ID_FILE)
 
-conditional_build: check_config
-	mkdir -p $(INSTALL_DIR)/lib/public/
-	$(MAKE) -j 1 -C $(APP)/src
-	$(MAKE) -j 1 -C $(APP)/src install
-	cp -d $(BCM_FSBUILD_DIR)/public/lib/libcom_err.so* $(INSTALL_DIR)/lib/public/
-	cp -d $(BCM_FSBUILD_DIR)/public/lib/libk5crypto.so* $(INSTALL_DIR)/lib/public/
-	cp -d $(BCM_FSBUILD_DIR)/public/lib/libkrb5.so* $(INSTALL_DIR)/lib/public/
-	cp -d $(BCM_FSBUILD_DIR)/public/lib/libgssapi_krb5.so* $(INSTALL_DIR)/lib/public/
-	cp -d $(BCM_FSBUILD_DIR)/public/lib/libkrb5support.so* $(INSTALL_DIR)/lib/public/
+$(COMPILE_ID_FILE) : $(CONFIG_ID_FILE)
+	$(MAKE) -C $(APP)/src 1>$(COMPILE_ID_FILE) 2>&1
+
+install: sanity_check $(COMPILE_ID_FILE)
+	@mkdir -p $(INSTALL_DIR)/lib/public/
+	$(MAKE) -C $(APP)/src install
+	@cp -d $(SERVER_LIBS) $(INSTALL_DIR)/lib/public/
+
+clean:
+	-$(MAKE) -C $(APP)/src distclean
+	-@rm $(APP)-CONFIG_ID_* $(APP)-COMPILE_ID_*
+
+distclean:
+	rm -rf .pc $(APP) $(APP)-*_ID_*
 
 shell:
 	bash -i

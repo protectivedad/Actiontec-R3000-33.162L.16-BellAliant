@@ -13,16 +13,20 @@ BUILD_DIR:=$(word 1, $(BUILD_DIR))
 
 include $(BUILD_DIR)/make.common
 
-APP = zlib
-VERS = 1.2.11
-FILE = $(APP)-$(VERS).tar.gz
-LOC = https://zlib.net
+APP = OpenSSL
+VERS = 1_0_1u
+FILE = $(APP)_$(VERS).tar.gz
+LOC = https://github.com/openssl/openssl/archive
 
 CONFIGURE_VARS := \
-	ac_cv_linux_vers=$(LINUX_VER_STR)
+	PKG_CONFIG_LIBDIR=$(BCM_FSBUILD_DIR)/public/lib \
+	PKG_CONFIG_PATH=$(BCM_FSBUILD_DIR)/public/lib/pkgconfig \
+	CROSS_COMPILE=
 
 CONFIGURE_ARGS := \
-	--prefix=$(BCM_FSBUILD_DIR)/public
+	--prefix=/ \
+	no-hw shared no-bf no-cast no-md2 no-mdc2 no-ripemd no-rc2 no-unit-test no-static-engine no-engine no-idea \
+	linux-armv4
 
 export LINUX_VER_STR TOOLCHAIN_PREFIX
 CONFIG_ID_FILE = $(CURR_DIR)/$(APP)-CONFIG_ID_$(TOOLCHAIN_PREFIX)_$(LINUX_VER_STR)
@@ -46,16 +50,17 @@ $(PATCH_ID_FILE) : $(SOURCE_ID_FILE)
 
 $(CONFIG_ID_FILE) : $(PATCH_ID_FILE)
 	$(MAKE) clean
-	@cd $(APP); $(CONFIGURE_VARS) ./configure $(CONFIGURE_ARGS) 1>$(CONFIG_ID_FILE) 2>&1
+	@cd $(APP); $(CONFIGURE_VARS) ./Configure $(CONFIGURE_ARGS) 1>$(CONFIG_ID_FILE) 2>&1
+	$(MAKE) -C $(APP) depend 1>>$(CONFIG_ID_FILE) 2>&1
 	@echo "$(APP) is configured"
 
 $(COMPILE_ID_FILE) : $(CONFIG_ID_FILE)
-	$(MAKE) -C $(APP) 1>$(COMPILE_ID_FILE) 2>&1
+	$(MAKE) -C $(APP) all 1>$(COMPILE_ID_FILE) 2>&1
 
 install: sanity_check $(COMPILE_ID_FILE)
 	mkdir -p $(INSTALL_DIR)/lib/public/
-	$(MAKE) -C $(APP) install
-	cp -d $(BCM_FSBUILD_DIR)/public/lib/libz.so* $(INSTALL_DIR)/lib
+	@cp -f $(APP)/libcrypto.so.1.0.0 $(INSTALL_DIR)/lib/public/
+	@cp -f $(APP)/libssl.so.1.0.0 $(INSTALL_DIR)/lib/public/
 
 clean:
 	-$(MAKE) -C $(APP) distclean

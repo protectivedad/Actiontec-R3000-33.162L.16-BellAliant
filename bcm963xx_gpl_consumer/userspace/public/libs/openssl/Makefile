@@ -1,5 +1,5 @@
 
-all dynamic install: conditional_build
+all dynamic : install
 
 #
 # Set our CommEngine directory (by splitting the pwd into two words
@@ -14,7 +14,7 @@ BUILD_DIR:=$(word 1, $(BUILD_DIR))
 include $(BUILD_DIR)/make.common
 
 APP = OpenSSL
-VERS = 1_0_1u
+VERS = 1_1_1a
 FILE = $(APP)_$(VERS).tar.gz
 LOC = https://github.com/openssl/openssl/archive
 
@@ -25,58 +25,51 @@ CONFIGURE_VARS := \
 
 CONFIGURE_ARGS := \
 	--prefix=$(BCM_FSBUILD_DIR)/public \
-	zlib-dynamic \
-	--with-zlib-include='$(BCM_FSBUILD_DIR)/public/include' \
-	no-hw shared no-bf no-cast no-md2 no-mdc2 no-ripemd no-rc2 no-unit-test no-static-engine no-engine no-idea \
+	--with-zlib-include='$(BCM_FSBUILD_DIR)/public/include' zlib-dynamic \
+	no-hw shared no-bf no-cast no-md2 no-mdc2 no-ripemd no-rc2 no-unit-test no-static-engine no-engine no-idea no-async \
 	linux-armv4
 
 export LINUX_VER_STR TOOLCHAIN_PREFIX
-CONFIG_ID_FILE = $(APP)/CONFIG_ID_$(TOOLCHAIN_PREFIX)_$(LINUX_VER_STR)
-PATCH_ID_FILE = $(APP)/PATCH_ID_$(TOOLCHAIN_PREFIX)_$(LINUX_VER_STR)
-SOURCE_ID_FILE = $(APP)/SOURCE_ID_$(TOOLCHAIN_PREFIX)_$(LINUX_VER_STR)
+CONFIG_ID_FILE = $(CURR_DIR)/$(APP)-CONFIG_ID_$(TOOLCHAIN_PREFIX)_$(LINUX_VER_STR)
+PATCH_ID_FILE = $(CURR_DIR)/$(APP)-PATCH_ID_$(TOOLCHAIN_PREFIX)_$(LINUX_VER_STR)
+SOURCE_ID_FILE = $(CURR_DIR)/$(APP)-SOURCE_ID_$(TOOLCHAIN_PREFIX)_$(LINUX_VER_STR)
+COMPILE_ID_FILE = $(CURR_DIR)/$(APP)-COMPILE_ID_$(TOOLCHAIN_PREFIX)_$(LINUX_VER_STR)
 
-.PHONY: conditional_build
+.PHONY: install clean distclean
+
+$(FILE):
+	wget -O $(FILE) $(LOC)/$(FILE)
+
+$(SOURCE_ID_FILE) : $(FILE)
+	@mkdir -p $(APP)
+	(tar -C $(APP) --strip-components=1 -xkf $(FILE) 1>$(SOURCE_ID_FILE) 2>&1 || true)
+	@echo "$(APP) is untarred"
+
+$(PATCH_ID_FILE) : $(SOURCE_ID_FILE)
+	@touch $(PATCH_ID_FILE)
+	@echo "$(APP) is patched"
+
+$(CONFIG_ID_FILE) : $(PATCH_ID_FILE)
+	$(MAKE) clean
+	@cd $(APP); $(CONFIGURE_VARS) ./Configure $(CONFIGURE_ARGS) 1>$(CONFIG_ID_FILE) 2>&1
+	$(MAKE) -C $(APP) depend 1>>$(CONFIG_ID_FILE) 2>&1
+	@echo "$(APP) is configured"
+
+$(COMPILE_ID_FILE) : $(CONFIG_ID_FILE)
+	$(MAKE) -C $(APP) all 1>$(COMPILE_ID_FILE) 2>&1
+
+install: sanity_check $(COMPILE_ID_FILE)
+	$(MAKE) -C $(APP) install_sw
+	@cp -fd $(BCM_FSBUILD_DIR)/public/lib/libcrypto.so* $(INSTALL_DIR)/lib/public/
+	@cp -fd $(BCM_FSBUILD_DIR)/public/lib/libssl.so* $(INSTALL_DIR)/lib/public/
+	@cp -fd $(BCM_FSBUILD_DIR)/public/bin/openssl $(INSTALL_DIR)/bin/
 
 clean:
-	[ -e $(CONFIG_ID_FILE) ] && ($(MAKE) -C $(APP) distclean; rm $(CONFIG_ID_FILE)) || true
+	-$(MAKE) -C $(APP) distclean
+	-@rm $(APP)-CONFIG_ID_* $(APP)-COMPILE_ID_*
 
 distclean:
-	rm -rf $(APP)
-
-check_untar:
-	@if [ ! -e $(SOURCE_ID_FILE) ]; then \
-		[ ! -e $(FILE) ] && wget -O $(FILE) $(LOC)/$(FILE) || true; \
-		mkdir -p $(APP); \
-		(tar -C $(APP) --strip-components=1 -xkf $(FILE) 2> /dev/null || true); \
-	fi
-	@echo "$(APP) is untarred"
-	@touch $(SOURCE_ID_FILE)
-
-check_patch: check_untar
-	@echo "$(APP) is patched"
-	@touch $(PATCH_ID_FILE)
-
-check_config: check_patch
-	[ ! -e $(CONFIG_ID_FILE) ] && ( \
-		cd $(APP); \
-		$(MAKE) distclean; \
-		$(CONFIGURE_VARS) ./Configure $(CONFIGURE_ARGS); \
-		$(MAKE) depend;) || true
-	@echo "$(APP) is configured"
-	@touch $(CONFIG_ID_FILE)
-
-conditional_build: check_config
-	$(MAKE) -C $(APP) all
-	mkdir -p $(INSTALL_DIR)/lib/public/
-	$(MAKE) -C $(APP) install_sw
-	cp -fd $(BCM_FSBUILD_DIR)/public/lib/libcrypto.so* $(INSTALL_DIR)/lib/public/
-	cp -fd $(BCM_FSBUILD_DIR)/public/lib/libssl.so* $(INSTALL_DIR)/lib/public/
-
-clean:
-	git -C openssl clean -f
-
-distclean: clean
-	git -C openssl checkout
+	rm -rf $(APP) $(APP)-*_ID_*
 
 shell:
-	bash -i
+	$(CONFIGURE_VARS) bash -i
