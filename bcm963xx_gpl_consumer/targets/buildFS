@@ -17,9 +17,22 @@ if [ "$INSTALL_DIR" == "" ]; then
 fi
 
 cd /opt/toolchains/crosstools-arm-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-NPTL/lib
-cp libcdkshell.so libvlanctl.so libphysym.so libcdkpkgsrc.so libcdklibc.so libbmdapi.so libcdkdsym.so libbmdshell.so libbmedia.so libcdksym.so libbdlna.so libphypkgsrc.so libcms_dal.so libphygeneric.so libbmdshared.so libbmdpkgsrc.so libcms_core.so libcdkmain.so librdpactl.so libfcctl.so libtr143_utils.so libphyutil.so libb_playback_ip.so libnanoxml.so libethswctl.so libpwrctl.so libsnoopctl.so libcms_cli.so libtmctl.so libmdm.so libcms_qdm.so libbdlna-dms-aal.so libbdlna-dms.so libcdkshared.so  libcms_msg.so libcms_util.so libcms_boardctl.so libdbus.so libnvram.so libwlmngr.so  $TOP_DIR/$PROFILE/fs.install/lib
+cp libdbus.so libnvram.so libwlmngr.so $INSTALL_DIR/lib
+cp librdpactl.so libsnoopctl.so libtmctl.so libtr143_utils.so libvlanctl.so $INSTALL_DIR/lib/private
+cp libphysym.so libphypkgsrc.so libphygeneric.so libphyutil.so $INSTALL_DIR/lib/private
+cp libethswctl.so libfcctl.so libmdm.so libnanoxml.so libpwrctl.so $INSTALL_DIR/lib/private
+cp libb_playback_ip.so libbdlna-dms-aal.so libbdlna-dms.so libbdlna.so libbmedia.so $INSTALL_DIR/lib/private
+cp libbmdapi.so libbmdpkgsrc.so libbmdshared.so libbmdshell.so $INSTALL_DIR/lib/private
+cp libcdkdsym.so libcdklibc.so libcdkmain.so libcdkpkgsrc.so libcdkshared.so libcdkshell.so libcdksym.so $INSTALL_DIR/lib/private
+cp libcms_dal.so libcms_core.so libcms_cli.so libcms_qdm.so $INSTALL_DIR/lib/private
 cd $TOP_DIR
 ROOTFS=$PROFILE/fs
+
+ln -fsr $INSTALL_DIR/lib/public/libcms_msg.so $INSTALL_DIR/lib
+ln -fsr $INSTALL_DIR/lib/public/libcms_util.so $INSTALL_DIR/lib
+ln -fsr $INSTALL_DIR/lib/public/libcms_boardctl.so $INSTALL_DIR/lib
+ln -fsr $INSTALL_DIR/lib/libqcsapi_client.so.1 $INSTALL_DIR/lib/libqcsapi_client.so
+ln -fsr $INSTALL_DIR/lib/libqcsapi_client.so.1 $INSTALL_DIR/lib/libqcsapi_client.so.1.0.1
 
 # Create file system dir
 if [ -L $ROOTFS ]; then
@@ -73,9 +86,6 @@ if [ "$BUILD_DEBUG_TOOLS" == "y" ] ; then
     rm -f $ROOTFS/debug
     ln -s sys/kernel/debug $ROOTFS/debug
 fi
-
-# Update kernel directory based on kernel:
-sed -i "s|^KERNELVER=_set_by_buildFS_$|KERNELVER=$LINUX_VER_STR|" $ROOTFS/etc/init.d/*.sh;
 
 if [ "$BRCM_CHIP" == "6816" ] ; then
         mkdir $ROOTFS/etc/cmf
@@ -280,6 +290,9 @@ for f in $MODULE_CLEAN_UP; do \
 done
 eval "find $TOP_DIR/$ROOTFS/lib/modules -name wlobj-*.ko | xargs rm -f"
 
+#delete unwanted share directories
+rm -rf $TOP_DIR/$ROOTFS/share $TOP_DIR/$ROOTFS/usr/share $TOP_DIR/$ROOTFS/root/dropbear/share
+
 # strip userspace binaries is sstrip is "enabled"
 # sstrip is set to /bin/touch if BUILD_GDBSERVER=y
 if [ "$SSTRIP" != "/bin/touch" ]; then
@@ -287,7 +300,8 @@ if [ "$SSTRIP" != "/bin/touch" ]; then
     # libraries even smaller by doing sstrip here.  Also libcreduction
     # does not process all libs, e.g. libmdm.so
     echo "Stripping userspace binaries..."
-    $SSTRIP $TOP_DIR/$ROOTFS/bin/* $TOP_DIR/$ROOTFS/lib/*.so* $TOP_DIR/$ROOTFS/lib/*/*.so*
+    $SSTRIP $TOP_DIR/$ROOTFS/bin/* $TOP_DIR/$ROOTFS/sbin/* $TOP_DIR/$ROOTFS/lib/*.so* $TOP_DIR/$ROOTFS/lib/*/*.so* \
+            $TOP_DIR/$ROOTFS/usr/bin/* $TOP_DIR/$ROOTFS/usr/sbin/* $TOP_DIR/$ROOTFS/root/dropbear/*
 fi
 
 # Symlink the CMS libraries needed by busybox, which is also /sbin/init (the

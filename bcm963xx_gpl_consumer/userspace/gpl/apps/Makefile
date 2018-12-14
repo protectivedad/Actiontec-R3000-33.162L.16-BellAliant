@@ -12,13 +12,12 @@
 # that directory during make and make clean.  (Auto detected directories
 # are listed in the AUTODETECT_SUBDIRS variable.  Type make show_subdirs)
 #
-HARDCODED_SUBDIRS := atm2684 bridge-utils busybox sysstat dproxy-nexgen \
+HARDCODED_SUBDIRS := atm2684 bridge-utils sysstat dproxy-nexgen \
            ftpd iproute2 udhcp urlfilterd zebra \
            dynahelper iperf conntrack \
            openl2tpd rng-tools-2 pptp \
            mtd-util \
-           felix_framework \
-           samba36
+           felix_framework
 
 ifneq ($(strip $(AEI_VDSL_CUSTOMER_NCS)),)
 HARDCODED_SUBDIRS += ebtables iptables jamvm-1.5.4
@@ -106,20 +105,6 @@ export BRCMCONFIG
 
 PERL5LIB=$(HOSTTOOLS_PERL_LIB)
 export PERL5LIB
-
-ifneq ($(strip $(BUILD_BUSYBOX)),)
-busybox: sanity_check
-	mkdir -p $(INSTALL_DIR)/bin
-	(tar xkfj busybox.tar.bz2 2> /dev/null || true)
-	(patch -d busybox -F0 -Ns -p1 -i ../busybox.patch || true)
-	cd busybox; chmod -f +w .config .config.old ; cp -f .config .config.old; cat $(BRCMCONFIG) > .config ; \
-	for i in config.d/[0-9]*.conf ; do echo "config script $$i" ; perl $$i ; done
-	$(MAKE) -C busybox include/autoconf.h
-	$(MAKE) -C busybox install
-else
-busybox: sanity_check
-	@echo "skipping busybox (not configured)"
-endif
 
 ifneq ($(strip $(BUILD_SYSSTAT)),)
 sysstat: sanity_check
@@ -277,14 +262,6 @@ zebra: sanity_check
 else
 zebra: sanity_check
 	@echo "skipping zebra (not configured)"
-endif
-
-ifneq ($(strip $(BUILD_SAMBA)),)
-samba36: sanity_check
-	$(MAKE) -C ./samba36 -j 1
-else
-samba36: sanity_check
-	@echo "skipping $@ (not configured)"
 endif
 
 ifneq ($(strip $(BUILD_IPERF)),)

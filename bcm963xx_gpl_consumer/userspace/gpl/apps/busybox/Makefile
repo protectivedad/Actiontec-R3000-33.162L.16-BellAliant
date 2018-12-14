@@ -1,48 +1,69 @@
-ifneq ($(strip $(BUILD_BUSYBOX)),)
 
-conditional_build: all
+all dynamic : install
 
-else
+#
+# Set our CommEngine directory (by splitting the pwd into two words
+# at /userspace and taking the first word only).
+# Then include the common defines under CommEngine.
+# You do not need to modify this part.
+#
+CURR_DIR := $(shell pwd)
+BUILD_DIR:=$(subst /userspace, /userspace,$(CURR_DIR))
+BUILD_DIR:=$(word 1, $(BUILD_DIR))
 
-conditional_build:
-	@echo "skipping busybox (not configured)"
+include $(BUILD_DIR)/make.common
 
-endif
-
+APP = busybox
+VERS = 1.29.3
+FILE = $(APP)-$(VERS).tar.bz2
 LOC = https://busybox.net/downloads/
-APP = busybox-1.29.3
-FILE = $(APP).tar.bz2
 
 export LINUX_VER_STR TOOLCHAIN_PREFIX
-CONFIG_ID_FILE = $(APP)/CONFIG_ID_$(TOOLCHAIN_PREFIX)_$(LINUX_VER_STR)
-PATCH_ID_FILE = $(APP)/PATCH_ID_$(TOOLCHAIN_PREFIX)_$(LINUX_VER_STR)
-SOURCE_ID_FILE = $(APP)/SOURCE_ID_$(TOOLCHAIN_PREFIX)_$(LINUX_VER_STR)
+CONFIG_ID_FILE = $(CURR_DIR)/$(APP)-CONFIG_ID_$(TOOLCHAIN_PREFIX)_$(LINUX_VER_STR)
+PATCH_ID_FILE = $(CURR_DIR)/$(APP)-PATCH_ID_$(TOOLCHAIN_PREFIX)_$(LINUX_VER_STR)
+SOURCE_ID_FILE = $(CURR_DIR)/$(APP)-SOURCE_ID_$(TOOLCHAIN_PREFIX)_$(LINUX_VER_STR)
+COMPILE_ID_FILE = $(CURR_DIR)/$(APP)-COMPILE_ID_$(TOOLCHAIN_PREFIX)_$(LINUX_VER_STR)
 
-check_untar:
-	if [ ! -e $(SOURCE_ID_FILE) ]; then \
-		[ ! -e $(FILE) ] && wget $(LOC)/$(FILE) || true; \
-		(tar xkjf $(FILE) 2> /dev/null || true); \
-	fi
-	@echo "BUSYBOX is untarred"
-	@touch $(SOURCE_ID_FILE)
+.PHONY: install clean distclean
 
-check_patch: check_untar
-#	[ ! -e $(PATCH_ID_FILE) ] && quilt push -a || true
-	@echo "BUSYBOX is patched"
-	touch $(PATCH_ID_FILE)
+ifneq ($(strip $(BUILD_BUSYBOX)),)
 
-check_config: check_patch
-	if [ ! -e $(CONFIG_ID_FILE) ]; then \
-		$(MAKE) -C $(APP) distclean; \
-		cp busybox.defconfig $(APP)/.config; \
-	fi
-	@echo "BUSYBOX is configured"
-	touch $(CONFIG_ID_FILE)
+$(FILE):
+	wget -O $(FILE) $(LOC)/$(FILE)
 
-all: check_config
-	$(MAKE) -C $(APP)
+$(SOURCE_ID_FILE) : $(FILE)
+	@mkdir -p $(APP)
+	(tar -C $(APP) --strip-components=1 -xkf $(FILE) 1>$(SOURCE_ID_FILE) 2>&1 || true)
+	@echo "$(APP) is untarred"
+
+$(PATCH_ID_FILE): $(SOURCE_ID_FILE)
+	[ ! -e $(PATCH_ID_FILE) ] && quilt push -a  1>>$(PATCH_ID_FILE) 2>&1 || true
+	@echo "$(APP) is patched"
+
+$(CONFIG_ID_FILE) : $(PATCH_ID_FILE)
+	$(MAKE) clean
+	@cp busybox.defconfig $(APP)/.config
+	@echo Done >$(CONFIG_ID_FILE)
+	@echo "$(APP) is configured"
+
+$(COMPILE_ID_FILE) : $(CONFIG_ID_FILE)
+	$(MAKE) -C $(APP) 1>$(COMPILE_ID_FILE) 2>&1
+
+install: $(COMPILE_ID_FILE)
 	$(MAKE) -C $(APP) CONFIG_PREFIX=$(INSTALL_DIR) install
-	@echo "BUSYBOX is installed"
+	@echo "$(APP) is installed"
+
+else
+install: sanity_check
+	@echo "skipping $(APP) (not configured)"
+endif
+
+clean:
+	-$(MAKE) -C $(APP) distclean
+	-@rm $(APP)-CONFIG_ID_* $(APP)-COMPILE_ID_*
+
+distclean:
+	rm -rf .pc $(APP) $(APP)-*_ID_*
 
 shell:
-	bash -i
+	$(CONFIGURE_VARS) bash -i

@@ -1,0 +1,2 @@
+#!/root/bin/busybox ash
+env ENV=/etc/profile ash
