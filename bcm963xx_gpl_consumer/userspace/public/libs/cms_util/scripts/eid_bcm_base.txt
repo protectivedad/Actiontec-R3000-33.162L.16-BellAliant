@@ -123,18 +123,6 @@ BEGIN
 END
 
 BEGIN
-  eid         = EID_MCPD
-  name        = mcpd
-  flags       = EIF_MESSAGING_CAPABLE|EIF_AUTO_RELAUNCH|EIF_MSG_TERMINATE
-END
-
-BEGIN
-  eid         = EID_MCPCTL
-  name        = mcpctl
-  flags       = EIF_MESSAGING_CAPABLE|EIF_MULTIPLE_INSTANCES
-END
-
-BEGIN
   eid         = EID_WLMNGR
   name        = WLMNGR-DAEMON
   path        = /bin/wlmngr
