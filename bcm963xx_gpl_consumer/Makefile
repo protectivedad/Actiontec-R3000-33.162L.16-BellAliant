@@ -753,9 +753,9 @@ ifneq ($(strip $(BRCM_PERMIT_STDCPP)),)
 endif
 	cd $(TARGETS_DIR); ./buildFS;
 ifeq ($(strip $(BRCM_RAMDISK_BOOT_EN)),y)
-	cd $(TARGETS_DIR); $(HOSTTOOLS_DIR)/fakeroot/fakeroot ./buildFS_RD
+	cd $(TARGETS_DIR); LD_LIBRARY_PATH="/usr/lib/i386-linux-gnu/libfakeroot" fakeroot ./buildFS_RD
 endif
-	cd $(TARGETS_DIR); $(HOSTTOOLS_DIR)/fakeroot/fakeroot ./buildFS2
+	cd $(TARGETS_DIR); LD_LIBRARY_PATH="/usr/lib/i386-linux-gnu/libfakeroot" fakeroot ./buildFS2
 
 	@mkdir -p $(IMAGES_DIR)
 
@@ -848,10 +848,10 @@ ifneq ($(strip $(AEI_TWO_IN_ONE_FIRMWARE)),)
 else #AEI_TWO_IN_ONE_FIRMWARE
 	cd $(PROFILE_DIR); \
 	$(HOSTTOOLS_DIR)/AEINandImageBuilder $(BRCM_ENDIAN_FLAGS) --output bootfs128kbtagg.img --release $(BRCM_RELEASETAG) $(IMAGE_BUILD_OPTION_RELEASE2) $(BRCM_RELEASETAG2) --chip $(BRCM_CHIP) --board $(BRCM_BOARD_ID) --blocksize 128  --rootfsfile bootfs128kb.img ; \
-	$(BUILD_DIR)/userspace/private/apps/AEIImageBuilder/AEIImageBuilder $(BRCM_ENDIAN_FLAGS) --sdkversion 6 --customer $(ACT_CUSTOMER) --model $(ACT_SIGN_IMAGE_MODEL) --input bootfs128kbtagg.img --output bootfs128kbtag.img; \
+	$(HOSTTOOLS_DIR)/AEIImageBuilder $(BRCM_ENDIAN_FLAGS) --sdkversion 6 --customer $(ACT_CUSTOMER) --model $(ACT_SIGN_IMAGE_MODEL) --input bootfs128kbtagg.img --output bootfs128kbtag.img; \
    $(HOSTTOOLS_DIR)/scripts/bcmImageMaker --cferom $(CFE_ROM_FILE) --blocksize $(FLASH_NAND_BLOCK_128KB) --bootofs $(AEI_BOOT_OF_START) --bootsize 131072 --ubifs --bootfs bootfs128kbtag.img --rootfs ubi_rootfs128kb.img --image $(FLASH_NAND_CFEROM_FS_IMAGE_NAME_128)_ubi_tag_signed --fsonly    $(FLASH_NAND_FS_IMAGE_NAME_128)_ubi_tag_signed; \
 	$(HOSTTOOLS_DIR)/AEINandImageBuilder $(BRCM_ENDIAN_FLAGS) --output rootfs128kbtagg.img --release $(BRCM_RELEASETAG) --chip $(BRCM_CHIP) --board $(BRCM_BOARD_ID) --blocksize 128  --rootfsfile jffs2_rootfs128kb.img ; \
-	$(BUILD_DIR)/userspace/private/apps/AEIImageBuilder/AEIImageBuilder $(BRCM_ENDIAN_FLAGS) --sdkversion 6 --customer $(ACT_CUSTOMER) --model $(ACT_SIGN_IMAGE_MODEL) --input rootfs128kbtagg.img --output rootfs128kbtag.img ; \
+	$(HOSTTOOLS_DIR)/AEIImageBuilder $(BRCM_ENDIAN_FLAGS) --sdkversion 6 --customer $(ACT_CUSTOMER) --model $(ACT_SIGN_IMAGE_MODEL) --input rootfs128kbtagg.img --output rootfs128kbtag.img ; \
     $(HOSTTOOLS_DIR)/scripts/bcmImageMaker --cferom $(CFE_ROM_FILE) --blocksize $(FLASH_NAND_BLOCK_128KB) --bootofs $(AEI_BOOT_OF_START) --bootsize 131072 --rootfs rootfs128kbtag.img --image $(FLASH_NAND_CFEROM_FS_IMAGE_NAME_128)_jffs2_tag_signed --fsonly $(FLASH_NAND_FS_IMAGE_NAME_128)_jffs2_tag_signed; 
 endif #AEI_TWO_IN_ONE_FIRMWARE
 else #AEI_SIGNED_FIRMWARE
