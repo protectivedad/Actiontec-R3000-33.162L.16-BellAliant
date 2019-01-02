@@ -74,13 +74,11 @@ info_msg(const char *fmt, ...)
 	FILE* fpout;
 	char buf[MAXLINE + 1];
 	va_list	ap;
-	int n;
 
 	fpout = stdout;
 
 	va_start(ap, fmt);
 	vsnprintf(buf, MAXLINE, fmt, ap);
-	n = strlen(buf);
 	strcat(buf, "\n");
 
 	fputs(buf, fpout);

@@ -9,14 +9,7 @@ endif
 
 SUBDIRS = ubi-utils mkfs.ubifs
 
-TARGETS = ftl_format flash_erase flash_eraseall nanddump doc_loadbios \
-	ftl_check mkfs.jffs2 flash_lock flash_unlock flash_info \
-	flash_otp_info flash_otp_dump mtd_debug flashcp nandwrite nandtest \
-	jffs2dump \
-	nftldump nftl_format docfdisk \
-	rfddump rfdformat \
-	serve_image recv_image \
-	sumtool #jffs2reader
+TARGETS = 
 
 SYMLINKS =
 
