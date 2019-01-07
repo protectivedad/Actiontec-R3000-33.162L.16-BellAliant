@@ -9374,8 +9374,8 @@ PRINTK("EPPS2: u32=%08x, eppsig=%08x\n", u32, extParamSig);
 			skipDecodeID = 0;
 		}
 		else {
-			uint8_t powerOf2;
-			uint8_t eccLevel;
+			uint8_t powerOf2 = 0;
+			uint8_t eccLevel = 0;
 
 			
 			u32 = brcmnand_flashcache_read(&powerOf2, 
