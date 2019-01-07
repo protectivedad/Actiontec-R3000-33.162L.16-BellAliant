@@ -248,8 +248,8 @@ BUILD_NVRAM=dynamic
 #
 # WAN Protocols and VPN
 #
-BUILD_PPPD=dynamic
-PPP_AUTODISCONN=y
+#BUILD_PPPD=dynamic
+#PPP_AUTODISCONN=y
 BUILD_WANVLANMUX=y
 # BUILD_IPSEC_TOOLS is not set
 # BUILD_L2TPAC is not set
