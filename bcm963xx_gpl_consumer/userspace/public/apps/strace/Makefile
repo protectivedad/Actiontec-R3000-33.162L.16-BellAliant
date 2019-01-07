@@ -28,9 +28,9 @@ CONFIGURE_ARGS := \
 	--sbindir=$(INSTALL_DIR)/bin
 
 export LINUX_VER_STR TOOLCHAIN_PREFIX
-CONFIG_ID_FILE = $(APP)/CONFIG_ID_$(TOOLCHAIN_PREFIX)_$(LINUX_VER_STR)
-PATCH_ID_FILE = $(APP)/PATCH_ID_$(TOOLCHAIN_PREFIX)_$(LINUX_VER_STR)
-SOURCE_ID_FILE = $(APP)/SOURCE_ID_$(TOOLCHAIN_PREFIX)_$(LINUX_VER_STR)
+CONFIG_ID_FILE = $(APP)-CONFIG_ID_$(TOOLCHAIN_PREFIX)_$(LINUX_VER_STR)
+PATCH_ID_FILE = $(APP)-PATCH_ID_$(TOOLCHAIN_PREFIX)_$(LINUX_VER_STR)
+SOURCE_ID_FILE = $(APP)-SOURCE_ID_$(TOOLCHAIN_PREFIX)_$(LINUX_VER_STR)
 
 .PHONY: conditional_build
 
@@ -66,7 +66,6 @@ check_config: check_patch
 conditional_build: check_config
 	$(MAKE) -C $(APP)
 	$(MAKE) -C $(APP) install
-	@cp -af $(BCM_FSBUILD_DIR)/public/lib/libfuse.so* $(BCM_FSBUILD_DIR)/public/lib/libulockmgr.so* $(INSTALL_DIR)/lib/public
 
 else
 conditional_build: sanity_check
