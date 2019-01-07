@@ -6,13 +6,13 @@
 srcdir = .
 
 # Directories used by "make install":
-prefix = ${TOOLCHAIN_TOP}/usr/
+prefix = ${TOOLCHAIN}/
 local_prefix = /usr/local
 exec_prefix = ${prefix}
-libdir = ${TOOLCHAIN_TOP}/usr/lib
+libdir = ${TOOLCHAIN}/lib
 
 # Programs used by "make":
-CC="${TOOLCHAIN_TOP}/usr/bin/mips-linux-uclibc-gcc"
+CC="${TOOLCHAIN}/bin/mips-linux-uclibc-gcc"
 CFLAGS = -g -O2 -fvisibility=hidden
 CPPFLAGS = 
 LDFLAGS =  $(LDFLAGS_no)

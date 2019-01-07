@@ -34,7 +34,7 @@ CONFIGURE_VARS := \
 	PKG_CONFIG_LIBDIR=$(BCM_FSBUILD_DIR)/public/lib \
 	PKG_CONFIG_PATH=$(BCM_FSBUILD_DIR)/public/lib/pkgconfig \
 	CPPFLAGS='-I$(TOOLCHAIN_INCLUDE_DIR) -I$(BCM_FSBUILD_DIR)/public/include' \
-	LDFLAGS='-L$(TOOLCHAIN_TOP)/$(TOOLCHAIN_LIBDIR) -L$(INSTALL_DIR)/lib/public -Wl,-rpath-link,$(INSTALL_DIR)/lib/public'
+	LDFLAGS='-L$(TOOLCHAIN)/$(TOOLCHAIN_LIBDIR) -L$(INSTALL_DIR)/lib/public -Wl,-rpath-link,$(INSTALL_DIR)/lib/public'
 
 CONFIGURE_ARGS := \
 	--host=$(TOOLCHAIN_PREFIX) \

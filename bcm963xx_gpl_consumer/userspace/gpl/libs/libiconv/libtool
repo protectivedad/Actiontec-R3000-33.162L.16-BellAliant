@@ -78,17 +78,17 @@ build_os=elf
 echo="echo"
 
 # The archiver.
-AR="${TOOLCHAIN_TOP}/usr/bin/mips-linux-uclibc-ar"
+AR="${TOOLCHAIN}/bin/mips-linux-uclibc-ar"
 AR_FLAGS="cru"
 
 # A C compiler.
-LTCC="${TOOLCHAIN_TOP}/usr/bin/mips-linux-uclibc-gcc"
+LTCC="${TOOLCHAIN}/bin/mips-linux-uclibc-gcc"
 
 # LTCC compiler flags.
 LTCFLAGS="-g -O2"
 
 # A language-specific compiler.
-CC="${TOOLCHAIN_TOP}/usr/bin/mips-linux-uclibc-gcc"
+CC="${TOOLCHAIN}/bin/mips-linux-uclibc-gcc"
 
 # Is the compiler the GNU C compiler?
 with_gcc=yes
@@ -97,16 +97,16 @@ with_gcc=yes
 EGREP="/bin/grep -E"
 
 # The linker used to build libraries.
-LD="${TOOLCHAIN_TOP}/usr/mips-linux-uclibc/bin/ld"
+LD="${TOOLCHAIN}/mips-linux-uclibc/bin/ld"
 
 # Whether we need hard or soft links.
 LN_S="ln -s"
 
 # A BSD-compatible nm program.
-NM="${TOOLCHAIN_TOP}/usr/bin/mips-linux-uclibc-nm -B"
+NM="${TOOLCHAIN}/bin/mips-linux-uclibc-nm -B"
 
 # A symbol stripping program
-STRIP="${TOOLCHAIN_TOP}/usr/bin/mips-linux-uclibc-strip"
+STRIP="${TOOLCHAIN}/bin/mips-linux-uclibc-strip"
 
 # Used to examine libraries when file_magic_cmd begins "file"
 MAGIC_CMD=file
@@ -115,10 +115,10 @@ MAGIC_CMD=file
 DLLTOOL="dlltool"
 
 # Used on cygwin: object dumper.
-OBJDUMP="${TOOLCHAIN_TOP}/usr/bin/mips-linux-uclibc-objdump"
+OBJDUMP="${TOOLCHAIN}/bin/mips-linux-uclibc-objdump"
 
 # Used on cygwin: assembler.
-AS="${TOOLCHAIN_TOP}/usr/bin/mips-linux-uclibc-as"
+AS="${TOOLCHAIN}/bin/mips-linux-uclibc-as"
 
 # The name of the directory that contains temporary libtool files.
 objdir=.libs
@@ -199,7 +199,7 @@ library_names_spec="\${libname}\${release}\${shared_ext}\$versuffix \${libname}\
 soname_spec="\${libname}\${release}\${shared_ext}\$major"
 
 # Commands used to build and install an old-style archive.
-RANLIB="${TOOLCHAIN_TOP}/usr/bin/mips-linux-uclibc-ranlib"
+RANLIB="${TOOLCHAIN}/bin/mips-linux-uclibc-ranlib"
 old_archive_cmds="\$AR \$AR_FLAGS \$oldlib\$oldobjs~\$RANLIB \$oldlib"
 old_postinstall_cmds="chmod 644 \$oldlib~\$RANLIB \$oldlib"
 old_postuninstall_cmds=""
@@ -224,8 +224,8 @@ module_cmds=""
 module_expsym_cmds=""
 
 # Commands to strip libraries.
-old_striplib="${TOOLCHAIN_TOP}/usr/bin/mips-linux-uclibc-strip --strip-debug"
-striplib="${TOOLCHAIN_TOP}/usr/bin/mips-linux-uclibc-strip --strip-unneeded"
+old_striplib="${TOOLCHAIN}/bin/mips-linux-uclibc-strip --strip-debug"
+striplib="${TOOLCHAIN}/bin/mips-linux-uclibc-strip --strip-unneeded"
 
 # Dependencies to place before the objects being linked to create a
 # shared library.
@@ -325,7 +325,7 @@ variables_saved_for_relink="PATH LD_LIBRARY_PATH LD_RUN_PATH GCC_EXEC_PREFIX COM
 link_all_deplibs=unknown
 
 # Compile-time system search path for libraries
-sys_lib_search_path_spec="${TOOLCHAIN_TOP}/usr/lib/gcc/mips-linux-uclibc/4.4.2 ${TOOLCHAIN_TOP}/usr/lib/gcc ${TOOLCHAIN_TOP}/usr/mips-linux-uclibc/lib ${TOOLCHAIN_TOP}/lib ${TOOLCHAIN_TOP}/usr/lib"
+sys_lib_search_path_spec="${TOOLCHAIN}/lib/gcc/mips-linux-uclibc/4.4.2 ${TOOLCHAIN}/lib/gcc ${TOOLCHAIN}/mips-linux-uclibc/lib ${TOOLCHAIN}/../lib ${TOOLCHAIN}/lib"
 
 # Run-time system search path for libraries
 sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/lib/i386-linux-gnu/mesa-egl /usr/lib/nvidia-current /lib/i386-linux-gnu /usr/lib/i386-linux-gnu /lib/i686-linux-gnu /usr/lib/i686-linux-gnu /usr/local/lib /usr/lib/nvidia-settings /lib64 /usr/lib64 "
@@ -7320,17 +7320,17 @@ build_os=elf
 echo="echo"
 
 # The archiver.
-AR="${TOOLCHAIN_TOP}/usr/bin/mips-linux-uclibc-ar"
+AR="${TOOLCHAIN}/bin/mips-linux-uclibc-ar"
 AR_FLAGS="cru"
 
 # A C compiler.
-LTCC="${TOOLCHAIN_TOP}/usr/bin/mips-linux-uclibc-gcc"
+LTCC="${TOOLCHAIN}/bin/mips-linux-uclibc-gcc"
 
 # LTCC compiler flags.
 LTCFLAGS="-g -O2"
 
 # A language-specific compiler.
-CC="${TOOLCHAIN_TOP}/usr/bin/mips-linux-uclibc-g++"
+CC="${TOOLCHAIN}/bin/mips-linux-uclibc-g++"
 
 # Is the compiler the GNU C compiler?
 with_gcc=yes
@@ -7339,16 +7339,16 @@ with_gcc=yes
 EGREP="/bin/grep -E"
 
 # The linker used to build libraries.
-LD="${TOOLCHAIN_TOP}/usr/bin/mips-linux-uclibc-ld"
+LD="${TOOLCHAIN}/bin/mips-linux-uclibc-ld"
 
 # Whether we need hard or soft links.
 LN_S="ln -s"
 
 # A BSD-compatible nm program.
-NM="${TOOLCHAIN_TOP}/usr/bin/mips-linux-uclibc-nm"
+NM="${TOOLCHAIN}/bin/mips-linux-uclibc-nm"
 
 # A symbol stripping program
-STRIP="${TOOLCHAIN_TOP}/usr/bin/mips-linux-uclibc-strip"
+STRIP="${TOOLCHAIN}/bin/mips-linux-uclibc-strip"
 
 # Used to examine libraries when file_magic_cmd begins "file"
 MAGIC_CMD=file
@@ -7357,10 +7357,10 @@ MAGIC_CMD=file
 DLLTOOL="dlltool"
 
 # Used on cygwin: object dumper.
-OBJDUMP="${TOOLCHAIN_TOP}/usr/bin/mips-linux-uclibc-objdump"
+OBJDUMP="${TOOLCHAIN}/bin/mips-linux-uclibc-objdump"
 
 # Used on cygwin: assembler.
-AS="${TOOLCHAIN_TOP}/usr/bin/mips-linux-uclibc-as"
+AS="${TOOLCHAIN}/bin/mips-linux-uclibc-as"
 
 # The name of the directory that contains temporary libtool files.
 objdir=.libs
@@ -7441,7 +7441,7 @@ library_names_spec="\${libname}\${release}\${shared_ext}\$versuffix \${libname}\
 soname_spec="\${libname}\${release}\${shared_ext}\$major"
 
 # Commands used to build and install an old-style archive.
-RANLIB="${TOOLCHAIN_TOP}/usr/bin/mips-linux-uclibc-ranlib"
+RANLIB="${TOOLCHAIN}/bin/mips-linux-uclibc-ranlib"
 old_archive_cmds="\$AR \$AR_FLAGS \$oldlib\$oldobjs~\$RANLIB \$oldlib"
 old_postinstall_cmds="chmod 644 \$oldlib~\$RANLIB \$oldlib"
 old_postuninstall_cmds=""
@@ -7463,16 +7463,16 @@ module_cmds=""
 module_expsym_cmds=""
 
 # Commands to strip libraries.
-old_striplib="${TOOLCHAIN_TOP}/usr/bin/mips-linux-uclibc-strip --strip-debug"
-striplib="${TOOLCHAIN_TOP}/usr/bin/mips-linux-uclibc-strip --strip-unneeded"
+old_striplib="${TOOLCHAIN}/bin/mips-linux-uclibc-strip --strip-debug"
+striplib="${TOOLCHAIN}/bin/mips-linux-uclibc-strip --strip-unneeded"
 
 # Dependencies to place before the objects being linked to create a
 # shared library.
-predep_objects="${TOOLCHAIN_TOP}/usr/lib/crti.o ${TOOLCHAIN_TOP}/usr/bin/../lib/gcc/mips-linux-uclibc/4.4.2/crtbeginS.o"
+predep_objects="${TOOLCHAIN}/lib/crti.o ${TOOLCHAIN}/bin/../lib/gcc/mips-linux-uclibc/4.4.2/crtbeginS.o"
 
 # Dependencies to place after the objects being linked to create a
 # shared library.
-postdep_objects="${TOOLCHAIN_TOP}/usr/bin/../lib/gcc/mips-linux-uclibc/4.4.2/crtendS.o ${TOOLCHAIN_TOP}/usr/lib/crtn.o"
+postdep_objects="${TOOLCHAIN}/bin/../lib/gcc/mips-linux-uclibc/4.4.2/crtendS.o ${TOOLCHAIN}/lib/crtn.o"
 
 # Dependencies to place before the objects being linked to create a
 # shared library.
@@ -7484,7 +7484,7 @@ postdeps="-lstdc++ -lm -lgcc_s -lc -lgcc_s"
 
 # The library search path used internally by the compiler when linking
 # a shared library.
-compiler_lib_search_path="-L${TOOLCHAIN_TOP}/usr/bin/../lib/gcc/mips-linux-uclibc/4.4.2 -L${TOOLCHAIN_TOP}/usr/bin/../lib/gcc -L${TOOLCHAIN_TOP}/usr/bin/../lib/gcc/mips-linux-uclibc/4.4.2/../../../../mips-linux-uclibc/lib -L${TOOLCHAIN_TOP}/lib -L${TOOLCHAIN_TOP}/usr/lib"
+compiler_lib_search_path="-L${TOOLCHAIN}/bin/../lib/gcc/mips-linux-uclibc/4.4.2 -L${TOOLCHAIN}/bin/../lib/gcc -L${TOOLCHAIN}/bin/../lib/gcc/mips-linux-uclibc/4.4.2/../../../../mips-linux-uclibc/lib -L${TOOLCHAIN}/../lib -L${TOOLCHAIN}/lib"
 
 # Method to check whether dependent libraries are shared objects.
 deplibs_check_method="pass_all"
@@ -7564,7 +7564,7 @@ variables_saved_for_relink="PATH LD_LIBRARY_PATH LD_RUN_PATH GCC_EXEC_PREFIX COM
 link_all_deplibs=unknown
 
 # Compile-time system search path for libraries
-sys_lib_search_path_spec="${TOOLCHAIN_TOP}/usr/lib/gcc/mips-linux-uclibc/4.4.2 ${TOOLCHAIN_TOP}/usr/lib/gcc ${TOOLCHAIN_TOP}/usr/mips-linux-uclibc/lib ${TOOLCHAIN_TOP}/lib ${TOOLCHAIN_TOP}/usr/lib"
+sys_lib_search_path_spec="${TOOLCHAIN}/lib/gcc/mips-linux-uclibc/4.4.2 ${TOOLCHAIN}/lib/gcc ${TOOLCHAIN}/mips-linux-uclibc/lib ${TOOLCHAIN}/../lib ${TOOLCHAIN}/lib"
 
 # Run-time system search path for libraries
 sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/lib/i386-linux-gnu/mesa-egl /usr/lib/nvidia-current /lib/i386-linux-gnu /usr/lib/i386-linux-gnu /lib/i686-linux-gnu /usr/lib/i686-linux-gnu /usr/local/lib /usr/lib/nvidia-settings /lib64 /usr/lib64 "

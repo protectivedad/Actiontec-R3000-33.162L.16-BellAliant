@@ -6,13 +6,13 @@
 srcdir = .
 
 # Directories used by "make install":
-prefix = ${TOOLCHAIN_TOP}/usr/
+prefix = ${TOOLCHAIN}/
 local_prefix = /usr/local
 exec_prefix = ${prefix}
 datarootdir = ${prefix}/share
 datadir = ${datarootdir}
-libdir = ${TOOLCHAIN_TOP}/usr/lib
-includedir = ${TOOLCHAIN_TOP}/usr/include
+libdir = ${TOOLCHAIN}/lib
+includedir = ${TOOLCHAIN}/include
 mandir = ${datarootdir}/man
 
 # Programs used by "make":
