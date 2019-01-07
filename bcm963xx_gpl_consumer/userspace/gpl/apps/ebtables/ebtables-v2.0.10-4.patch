@@ -344,11 +344,11 @@ diff -Naur ebtables-v2.0.10-4/extensions/ebt_ftos.c ebtables-v2.0.10-4-brcm/exte
 +    else if(ftosinfo->ftos_set == FTOS_8021Q)
 +        printf("802.1Q mapping to Tos");
 +    else
-+	printf("TOS set 0x%x", ftosinfo->ftos);
++        printf("TOS set 0x%x", ftosinfo->ftos);
 +
-+	if (ftosinfo->target == EBT_ACCEPT)
-+		return;
-+	printf(" --ftos-target %s", TARGET_NAME(ftosinfo->target));
++    if (ftosinfo->target == EBT_ACCEPT)
++        return;
++    printf(" --ftos-target %s", TARGET_NAME(ftosinfo->target));
 +}
 +
 +static int 
