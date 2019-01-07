@@ -4,7 +4,7 @@
 
 KERNELHDR := ../include
 
-# SUBDIRS = old-utils
+SUBDIRS = old-utils
 
 # CFLAGS += -Werror
 CPPFLAGS += -Iinclude -Isrc -I$(KERNELHDR)
