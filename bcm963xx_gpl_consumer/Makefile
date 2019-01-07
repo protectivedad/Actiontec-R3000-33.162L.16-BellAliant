@@ -225,8 +225,7 @@ userspace: sanity_check create_install data-model $(BCM_SWVERSION_FILE) kernelli
 libcreduction:
 	$(MAKE) -C hostTools/libcreduction install
 
-fakeroot:
-	$(MAKE) -C hostTools fakeroot
+
 
 menuconfig:
 	@cd $(INC_KERNEL_BASE); \
@@ -750,7 +749,7 @@ endif
 #
 ############################################################################
 
-buildimage: kernelbuild libcreduction fakeroot gen_credits
+buildimage: kernelbuild libcreduction gen_credits
 ifneq ($(strip $(BRCM_PERMIT_STDCPP)),)
 	@if ls $(PROFILE_DIR)/fs.install/lib/libstdc* 2> /dev/null ; then  \
 		echo -e "libstdc++ must be replaced with STLPORT";         \
