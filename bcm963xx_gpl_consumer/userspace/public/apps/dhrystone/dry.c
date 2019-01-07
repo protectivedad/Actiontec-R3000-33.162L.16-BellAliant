@@ -497,7 +497,7 @@ int bind_cpu=0;
 int threadId;
 #endif //CONFIG_MIPS_BRCM
 
-extern char     *malloc ();
+// extern char     *malloc (); 
 Enumeration     Func_1 ();
   /* forward declaration necessary since Enumeration may not simply be int */
 
@@ -626,11 +626,11 @@ main (argc, argv) int argc; char *argv[];
       if (bind_cpu) {
           int rc;
           cpu_set_t mask;
-          __CPU_ZERO(&mask);
+          CPU_ZERO(&mask);
           if (nthread % 2 == 0) {
-              __CPU_SET(0, &mask); printf("thread %d: bind to 0\n", nthread);
+              CPU_SET(0, &mask); printf("thread %d: bind to 0\n", nthread);
           } else {
-              __CPU_SET(1, &mask); printf("thread %d: bind to 1\n", nthread);
+              CPU_SET(1, &mask); printf("thread %d: bind to 1\n", nthread);
           }
           rc = sched_setaffinity(0, sizeof(cpu_set_t), &mask);
           if (rc < 0) {
