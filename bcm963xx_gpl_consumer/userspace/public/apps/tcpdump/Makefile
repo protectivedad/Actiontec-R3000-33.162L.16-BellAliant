@@ -20,8 +20,8 @@ LOC = http://www.tcpdump.org/release
 
 CONFIGURE_VARS := \
 	ac_cv_linux_vers=$(LINUX_VER_STR) \
-	CFLAGS='-I$(BCM_FSBUILD_DIR)/public/include -I$(TOOLCHAIN_INCLUDE_DIR) -isystem $(TOOLCHAIN_INCLUDE_DIR)' \
-	LDFLAGS='-L$(BCM_FSBUILD_DIR)/public/lib'
+	CFLAGS='-I$(BCM_FSBUILD_DIR)/public/include' \
+	LDFLAGS='-L$(INSTALL_DIR)/lib/public'
 
 CONFIGURE_ARGS := \
 	--host=$(TOOLCHAIN_PREFIX) \
