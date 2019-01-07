@@ -32,14 +32,13 @@ else
 
 KERNELDIR	?= ../../../..
 INSTALL		= INSTALL_MOD_PATH=../linux/modules
-CROSS		= ARCH=arm CROSS_COMPILE=/opt/toolchains/crosstools-arm-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-NPTL/usr/bin/arm-linux-
 PWD		:= $(shell pwd)
 
 default:
-	$(MAKE) -C $(KERNELDIR) $(CROSS) M=$(PWD) modules
+	$(MAKE) -C $(KERNELDIR) M=$(PWD) modules
 
 install:
-	$(MAKE) -C $(KERNELDIR) $(CROSS) $(INSTALL) M=$(PWD) modules_install
+	$(MAKE) -C $(KERNELDIR) $(INSTALL) M=$(PWD) modules_install
 
 endif
 
