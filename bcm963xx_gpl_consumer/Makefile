@@ -209,6 +209,7 @@ kernelbuild: $(BCM_KF_KCONFIG_FILE)
 endif
 
 
+userspace: export CROSS_COMPILE=$(USERSPACE_TOOLCHAIN)/bin/$(TOOLCHAIN_PREFIX)-
 userspace: sanity_check create_install data-model $(BCM_SWVERSION_FILE) kernellinks
 	@echo "MAKING USERSPACE"
 	$(MAKE) -j $(ACTUAL_MAX_JOBS) -C userspace
@@ -292,6 +293,7 @@ define pre_kernelbuild
 	$(MAKE) oldconfig;
 endef
 
+kernelbuild: export CROSS_COMPILE=$(KERNEL_TOOLCHAIN)/bin/$(TOOLCHAIN_PREFIX)-
 kernelbuild: kernellinks $(BCM_SWVERSION_FILE) $(AEI_PRODUCTINFO_FILE)
 	$(call pre_kernelbuild)
 	cd $(KERNEL_DIR); $(MAKE) -j $(ACTUAL_MAX_JOBS)
@@ -308,6 +310,7 @@ kernel_config_test:
 
 kernel: sanity_check create_install kernelbuild hosttools buildimage
 
+kernelbuildlite: export CROSS_COMPILE=$(KERNEL_TOOLCHAIN)/bin/$(TOOLCHAIN_PREFIX)-
 ifeq ($(strip $(BRCM_DRIVER_BCMDSP)),m)
 kernelbuildlite:
 	@echo "******************** Kernel Build Lite ********************";
@@ -321,6 +324,7 @@ kernelbuildlite:
 	@echo "******************** Kernel Build Lite DONE ********************"
 endif
 
+modbuild: export CROSS_COMPILE=$(KERNEL_TOOLCHAIN)/bin/$(TOOLCHAIN_PREFIX)-
 ifeq ($(strip $(VOXXXLOAD)),1)
 modbuild: touch_voice_files 
 	@echo "******************** Starting modbuild (VOXXXLOAD) ********************";
@@ -422,7 +426,7 @@ endif
 
 ifneq ($(strip $(BUILD_GDBSERVER)),)
 gdbserver:
-	install -m 755 $(TOOLCHAIN_TOP)/usr/$(TOOLCHAIN_PREFIX)/target_utils/gdbserver $(INSTALL_DIR)/bin
+	install -m 755 $(TOOLCHAIN)/$(TOOLCHAIN_PREFIX)/target_utils/gdbserver $(INSTALL_DIR)/bin
 else
 gdbserver:
 endif

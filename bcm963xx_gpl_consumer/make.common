@@ -169,29 +169,27 @@ include $(PROFILE_FILE)
 
 # for MIPS, big endian, Linux 3.4.0
 DEFAULT_TOOLCHAIN_LINUX_3_4_0_RT_MIPS       := /opt/toolchains/crosstools-mips-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21
-DEFAULT_TOOLCHAIN_VER_LINUX_3_4_0_RT_MIPS   := 4.6.2
 TOOLCHAIN_PREFIX_LINUX_3_4_0_RT_MIPS        := mips-unknown-linux-uclibc
-TOOLCHAIN_LIBDIR_LINUX_3_4_0_RT_MIPS        := usr/$(TOOLCHAIN_PREFIX_LINUX_3_4_0_RT_MIPS)/sysroot/lib
-TOOLCHAIN_INCDIR_LINUX_3_4_0_RT_MIPS        := usr/$(TOOLCHAIN_PREFIX_LINUX_3_4_0_RT_MIPS)/sysroot/usr/include
 
 # for MIPS, little endian, Linux 3.4.0
 DEFAULT_TOOLCHAIN_LINUX_3_4_0_RT_MIPSEL     := /opt/toolchains/crosstools-mipsel-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21
-DEFAULT_TOOLCHAIN_VER_LINUX_3_4_0_RT_MIPSEL := 4.6.2
 TOOLCHAIN_PREFIX_LINUX_3_4_0_RT_MIPSEL      := mipsel-unknown-linux-uclibc
-TOOLCHAIN_LIBDIR_LINUX_3_4_0_RT_MIPSEL      := usr/$(TOOLCHAIN_PREFIX_LINUX_3_4_0_RT_MIPSEL)/sysroot/lib
-TOOLCHAIN_INCDIR_LINUX_3_4_0_RT_MIPSEL      := usr/$(TOOLCHAIN_PREFIX_LINUX_3_4_0_RT_MIPSEL)/sysroot/usr/include
 
 # for ARM, Linux 3.4.0
-DEFAULT_TOOLCHAIN_LINUX_3_4_0_RT_ARM        := /opt/toolchains/crosstools-arm-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-NPTL
-DEFAULT_TOOLCHAIN_VER_LINUX_3_4_0_RT_ARM    := 4.6.2
 TOOLCHAIN_PREFIX_LINUX_3_4_0_RT_ARM         := arm-unknown-linux-uclibcgnueabi
-TOOLCHAIN_LIBDIR_LINUX_3_4_0_RT_ARM         := usr/$(TOOLCHAIN_PREFIX_LINUX_3_4_0_RT_ARM)/sysroot/lib
-TOOLCHAIN_INCDIR_LINUX_3_4_0_RT_ARM         := usr/$(TOOLCHAIN_PREFIX_LINUX_3_4_0_RT_ARM)/sysroot/usr/include
+DEFAULT_TOOLCHAIN_LINUX_3_4_0_RT_ARM        := /opt/toolchains/crosstools-arm-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-NPTL/usr
+USERSPACE_TOOLCHAIN_LINUX_3_4_0_RT_ARM        := /opt/toolchains/crosstools-arm-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-NPTL/usr
 
-LINUX_ZIP_FILE_LINUX_3_4_0_RT         := src-linux-3.4.11-rt19.tar.bz2
-LINUX_SUB_DIR_LINUX_3_4_0_RT          := linux-3.4rt
-KERNEL_CHECK_FILE_LINUX_3_4_0_RT      := MAINTAINERS
-LINUX_VER_STR_LINUX_3_4_0_RT          := 3.4.11-rt19
+ifndef USERSPACE_TOOLCHAIN_${PROFILE_KERNEL_VER}_${ARCHCAP}
+USERSPACE_TOOLCHAIN_${PROFILE_KERNEL_VER}_${ARCHCAP} := ${DEFAULT_TOOLCHAIN_${PROFILE_KERNEL_VER}_${ARCHCAP}}
+endif
+
+USERSPACE_TOOLCHAIN_VER_LINUX_3_4_0_RT_ARM  := $(shell echo $$($(USERSPACE_TOOLCHAIN_LINUX_3_4_0_RT_ARM)/bin/$(TOOLCHAIN_PREFIX_LINUX_3_4_0_RT_ARM)-gcc -dumpversion))
+
+LINUX_ZIP_FILE_${PROFILE_KERNEL_VER} := src-linux-3.4.11-rt19.tar.bz2
+LINUX_SUB_DIR_${PROFILE_KERNEL_VER} := linux-3.4rt
+KERNEL_CHECK_FILE_${PROFILE_KERNEL_VER} := MAINTAINERS
+LINUX_VER_STR_${PROFILE_KERNEL_VER} := 3.4.11-rt19
 
 ifeq ($(strip $(PROFILE_ARCH)),mips)
 ARCHCAP := MIPS
@@ -215,14 +213,19 @@ ifeq ($(PROFILE_KERNEL_VER),)
 $(error KERNEL VERSION not specified in profile $(PROFILE_FILE))
 endif
 
-ifndef TOOLCHAIN_TOP
-TOOLCHAIN_TOP := ${DEFAULT_TOOLCHAIN_${PROFILE_KERNEL_VER}_${ARCHCAP}}
+KERNEL_TOOLCHAIN := ${DEFAULT_TOOLCHAIN_${PROFILE_KERNEL_VER}_${ARCHCAP}}
+USERSPACE_TOOLCHAIN := ${USERSPACE_TOOLCHAIN_${PROFILE_KERNEL_VER}_${ARCHCAP}}
+
+ifndef TOOLCHAIN
+TOOLCHAIN := $(USERSPACE_TOOLCHAIN)
 endif
 
-TOOLCHAIN_VER := ${DEFAULT_TOOLCHAIN_VER_${PROFILE_KERNEL_VER}_${ARCHCAP}}
-TOOLCHAIN_LIBDIR := ${TOOLCHAIN_LIBDIR_${PROFILE_KERNEL_VER}_${ARCHCAP}}
+TOOLCHAIN_VER := ${USERSPACE_TOOLCHAIN_VER_${PROFILE_KERNEL_VER}_${ARCHCAP}}
 TOOLCHAIN_PREFIX := ${TOOLCHAIN_PREFIX_${PROFILE_KERNEL_VER}_${ARCHCAP}}
-TOOLCHAIN_INCLUDE_DIR := $(TOOLCHAIN_TOP)/${TOOLCHAIN_INCDIR_${PROFILE_KERNEL_VER}_${ARCHCAP}}
+
+TOOLCHAIN_LIBDIR := $(TOOLCHAIN_PREFIX)/sysroot/lib
+TOOLCHAIN_INCLUDE_DIR := $(TOOLCHAIN)/$(TOOLCHAIN_PREFIX)/sysroot/usr/include
+
 KERNEL_CHECK_FILE := ${KERNEL_CHECK_FILE_${PROFILE_KERNEL_VER}}
 LINUX_VER_STR := ${LINUX_VER_STR_${PROFILE_KERNEL_VER}}
 
@@ -365,14 +368,13 @@ ifeq ($(strip $(BRCM_UCLIBC)),y)
 NTC=1
 ifeq ($(strip $(NTC)),1)
 
-TOOLCHAIN = $(TOOLCHAIN_TOP)/usr
-LIBDIR = $(TOOLCHAIN_TOP)/$(TOOLCHAIN_LIBDIR)
-HOSTUSRLIBDIR = $(TOOLCHAIN_TOP)/usr/lib
-USRGCCLIBDIR = $(TOOLCHAIN_TOP)/usr/lib/gcc/$(TOOLCHAIN_PREFIX)/$(TOOLCHAIN_VER)
-EXTRALIBDIR = $(TOOLCHAIN_TOP)/usr/$(TOOLCHAIN_PREFIX)/lib
-EXTRAINCDIR = $(TOOLCHAIN_TOP)/usr/lib/gcc/$(TOOLCHAIN_PREFIX)/$(TOOLCHAIN_VER)/include
-LIB_PATH        = $(TOOLCHAIN_TOP)/lib
-LIBCDIR         = $(TOOLCHAIN_TOP)/lib
+LIBDIR = $(TOOLCHAIN)/$(TOOLCHAIN_LIBDIR)
+HOSTUSRLIBDIR = $(TOOLCHAIN)/lib
+USRGCCLIBDIR = $(TOOLCHAIN)/lib/gcc/$(TOOLCHAIN_PREFIX)/$(TOOLCHAIN_VER)
+EXTRALIBDIR = $(TOOLCHAIN)/$(TOOLCHAIN_PREFIX)/lib
+EXTRAINCDIR = $(TOOLCHAIN)/lib/gcc/$(TOOLCHAIN_PREFIX)/$(TOOLCHAIN_VER)/include
+LIB_PATH        = $(TOOLCHAIN)/lib
+LIBCDIR         = $(TOOLCHAIN)/lib
 
 ifndef NO_WERRS
 # The new compiler has a bug that if you specify -Werror=frame-larger-than=X, it treats X as 1 (and errors on all functions)
@@ -443,7 +445,7 @@ endif
 # SSTRIP is used to strip userspace apps in the final fs dir.
 
 
-export TOOLCHAIN_TOP TOOLCHAIN LEGACY_TOOLCHAIN CROSS_COMPILE \
+export TOOLCHAIN TOOLCHAIN LEGACY_TOOLCHAIN CROSS_COMPILE \
        AR AS LD CC CXX CPP NM STRIP SSTRIP OBJCOPY OBJDUMP RANLIB \
        LIB_PATH LIBDIR HOSTUSRLIBDIR EXTRALIBDIR EXTRAINCDIR LIBCDIR \
        BUILD_GDBSERVER
@@ -2075,7 +2077,7 @@ endif
 REQUIRED_BCMTOOL_VERSION := Rel1.0
 
 HOST_KERNEL_VERSION := $(shell uname -r)
-BCMTOOL_VERSION := `echo "BCM_TOOLCHAIN_VERSION" | gcc -E -P -o- -include $${TOOLCHAIN_TOP}/usr/include/bcm_toolver.h -xc - | sed 's/^"\(.*\)"$$/\1/'`
+BCMTOOL_VERSION := `echo "BCM_TOOLCHAIN_VERSION" | gcc -E -P -o- -include $${KERNEL_TOOLCHAIN}/include/bcm_toolver.h -xc - | sed 's/^"\(.*\)"$$/\1/'`
 
 
 prebuild_checks:
@@ -2086,10 +2088,10 @@ prebuild_checks:
 		echo "***************************************************"; \
 		exit 1; \
 	fi
-	@if [ ! -d $(TOOLCHAIN_TOP) ]; then \
+	@if [ ! -d $(TOOLCHAIN) ]; then \
 		echo "****************************************************"; \
 		echo "ERROR: could not find Toolchain"; \
-		echo "$(TOOLCHAIN_TOP)"; \
+		echo "$(TOOLCHAIN)"; \
 		echo "****************************************************"; \
 		exit 1; \
 	fi
@@ -2133,7 +2135,7 @@ endif
 	@$(HOSTTOOLS_DIR)/scripts/checkver.pl -s $(HOST_KERNEL_VERSION) -r $(REQUIRED_HOST_KERNEL_VERSION) || $(COND_FAIL);
 	@echo "Checking automake version:"
 	@$(HOSTTOOLS_DIR)/scripts/checkver.pl -e automake -r $(REQUIRED_AUTOMAKE_VERSION) || $(COND_FAIL);
-	@if [ "`which automake`" -ef "$TOOLCHAIN_TOP/usr/bin/automake" ]; then \
+	@if [ "`which automake`" -ef "$TOOLCHAIN/usr/bin/automake" ]; then \
 		echo "----------------------------------------------------------------"; \
 		echo "| ERROR: automake is being run from the cross-compile directory."; \
 		echo "| Please install a local copy on your build machine."; \
@@ -2142,7 +2144,7 @@ endif
 	fi
 	@echo "Checking autoconf version:"
 	@$(HOSTTOOLS_DIR)/scripts/checkver.pl -e autoconf -r $(REQUIRED_AUTOCONF_VERSION) || $(COND_FAIL);
-	@if [ "`which autoconf`" -ef "$TOOLCHAIN_TOP/usr/bin/autoconf" ]; then \
+	@if [ "`which autoconf`" -ef "$TOOLCHAIN/usr/bin/autoconf" ]; then \
 		echo "----------------------------------------------------------------"; \
 		echo "| ERROR: autoconf is being run from the cross-compile directory."; \
 		echo "| Please install a local copy on your build machine."; \
