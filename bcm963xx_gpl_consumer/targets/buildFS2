@@ -106,7 +106,7 @@ if [ "$BRCM_KERNEL_ROOTFS" = "all" ]; then
         echo -e "image=$PROFILE_DIR/rootfs.ubifs" >> $PROFILE_DIR/ubi.ini
         echo -e "vol_id=0"               >> $PROFILE_DIR/ubi.ini
         echo -e "vol_type=dynamic"       >> $PROFILE_DIR/ubi.ini
-        echo -e "vol_name=rootfs_ubifs"  >> $PROFILE_DIR/ubi.ini
+        echo -e "vol_name=rootfs_pivot"  >> $PROFILE_DIR/ubi.ini
         echo -e "vol_flags=autoresize"   >> $PROFILE_DIR/ubi.ini
 
         # -e == --lebsize = blocksize - 2xpagesize

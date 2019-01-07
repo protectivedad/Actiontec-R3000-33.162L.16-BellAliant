@@ -5,34 +5,6 @@ This has been changed in the Makefile to use the system fakeroot with the added 
 Also bind /bin/bash to /bin/sh for compiling.
   sudo mount --bind /bin/bash /bin/sh
 
-This builds the stock images for the BELL ALIANT R3000H-B0 hub plus a extra flash.tar.gz.
-
 DO NOT USE THESE TO UPGRADE. THE CFE IS BAD AND THE HUB WILL BE DEAD!!!!!
 
-They can be used to pivot under the existing system.
-
-Copy flash.tar.gz to a flash drive.
-
-Put it into the R3000H get telnet access and:
----- commands start ----
-gunzip -c /mnt/disk1_1/flash.tar.gz | tar -C /data -xf -
-
-/data/bin/ash
-mount -o remount,rw /
-
-cp -ai /data/etc /etc
-ln -sf /data/dropbear/scp /bin/scp
-mkdir -p /home
-
-mount -o remount,ro /
-
-reboot
----- commands end ----
-
-With the reboot you will now have a ssh/scp access on port 9122. After login run:
-/data/bin/ash
-to give you a full featured shell environment.
-
-Two files are updated
-1) /etc/inittab which starts the sshd server;
-2) /etc/init.d/mount-fs.sh which makes the /dev rw and has hooks to pivot the root system on boot.
+This builds a special ubi file that can be used to pivot under the existing system early (or late) in the boot process.
