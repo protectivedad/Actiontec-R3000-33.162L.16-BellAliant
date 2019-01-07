@@ -16,15 +16,21 @@ if [ "$INSTALL_DIR" == "" ]; then
     INSTALL_DIR=./$PROFILE/fs.install
 fi
 
+[ ! -d $INSTALL_DIR/lib/private ] && mkdir -p $INSTALL_DIR/lib/private
+
 cd /opt/toolchains/crosstools-arm-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-NPTL/lib
+
 cp libdbus.so libnvram.so libwlmngr.so $INSTALL_DIR/lib
 cp librdpactl.so libsnoopctl.so libtmctl.so libtr143_utils.so libvlanctl.so $INSTALL_DIR/lib/private
-cp libphysym.so libphypkgsrc.so libphygeneric.so libphyutil.so $INSTALL_DIR/lib/private
 cp libethswctl.so libfcctl.so libmdm.so libnanoxml.so libpwrctl.so $INSTALL_DIR/lib/private
 cp libb_playback_ip.so libbdlna-dms-aal.so libbdlna-dms.so libbdlna.so libbmedia.so $INSTALL_DIR/lib/private
-cp libbmdapi.so libbmdpkgsrc.so libbmdshared.so libbmdshell.so $INSTALL_DIR/lib/private
-cp libcdkdsym.so libcdklibc.so libcdkmain.so libcdkpkgsrc.so libcdkshared.so libcdkshell.so libcdksym.so $INSTALL_DIR/lib/private
 cp libcms_dal.so libcms_core.so libcms_cli.so libcms_qdm.so $INSTALL_DIR/lib/private
+
+# Analysis shows these libraries are not being used look at adding a dynamic way of triming unused libraries from image.
+# cp libphysym.so libphypkgsrc.so libphygeneric.so libphyutil.so $INSTALL_DIR/lib/private
+# cp libbmdapi.so libbmdpkgsrc.so libbmdshared.so libbmdshell.so $INSTALL_DIR/lib/private
+# cp libcdkdsym.so libcdklibc.so libcdkmain.so libcdkpkgsrc.so libcdkshared.so libcdkshell.so libcdksym.so $INSTALL_DIR/lib/private
+
 cd $TOP_DIR
 ROOTFS=$PROFILE/fs
 
@@ -404,6 +410,24 @@ fi
 # any missing proprietary binaries using that tarball
 ( cd $TOP_DIR/$ROOTFS ; tar xzkf ../filesystem.tgz 2>/dev/null ; true )
 
+# Take out any unused libraries
+# Requires:
+#  Library names stored in clear string format as the library name preceeded with lib.
+#    -Not as library name and later lib is prepended or postpended to the filename before opening.
+#  Libraries are named the way they are used in the applications.
+#    -libname.so.1.2.2.3 i fine but libalias.so will fail.
+#     for example libname.so is linked as libalias.so and only libalias is used.
+
+# Find files named lib something or other
+LIBRARY_FILES=`find ${TOP_DIR}/${ROOTFS} -name 'lib*.so*' -type f -printf %f'\n'`
+# Shorten to base names to pick up used links
+LIBRARY_NAMES=`for lib in ${LIBRARY_FILES}; do echo ${lib%.so*}; done;`
+
+LIBRARY_UNUSED=`for lib in ${LIBRARY_NAMES}; do grep -rq $lib --exclude=$lib* ${TOP_DIR}/${ROOTFS} || echo $lib; done`
+echo "Potential unused libraries: "
+echo ${LIBRARY_UNUSED}
+
+#rm `for files in ${LIBRARY_UNUSED}; do find ${TOP_DIR}/${ROOTFS} -name $files.so*; done`
 
 if [ "$BRCM_KERNEL_ROOTFS" = "all" ]; then
         cp $KERNEL_DIR/vmlinux $PROFILE_DIR/.
