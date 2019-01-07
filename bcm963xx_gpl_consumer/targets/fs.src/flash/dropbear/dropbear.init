@@ -9,6 +9,8 @@ start() {
 	# Give root user a home directory
 	sed -i -e 's/:Administrator:\/:/:Administrator:\/data\/dropbear:/g' /var/passwd
 
+	[ ! -e /bin/scp ] && ln -s /data/dropbear/scp /bin/scp || true
+
 	umask 077
 	/data/dropbear/dropbear $DROPBEAR_ARGS_9122
 }
