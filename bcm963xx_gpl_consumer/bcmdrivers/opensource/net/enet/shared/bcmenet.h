@@ -85,7 +85,7 @@ extern int logicalport_to_vport[];
 
 #define LOGICAL_PORT_TO_VPORT(p) logicalport_to_vport[(p)]
 #define VPORT_TO_LOGICAL_PORT(p) vport_to_logicalport[(p)]
-inline int IsLogPortWan( int log_port );
+int IsLogPortWan( int log_port );
 
 #if defined(CONFIG_BCM_SWITCH_PORT_TRUNK_SUPPORT)
 #define BCM_SW_MAX_TRUNK_GROUPS           (2)

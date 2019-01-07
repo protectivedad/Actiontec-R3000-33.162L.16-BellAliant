@@ -1543,7 +1543,7 @@ void link_change_handler(int port, int cb_port, int linkstatus, int speed, int d
     up(&bcm_link_handler_config);
 }
 /* Is the logical port configured as WAN? */
-inline int IsLogPortWan( int log_port )
+int IsLogPortWan( int log_port )
 {
     BcmEnet_devctrl *pDevCtrl;
     pDevCtrl = netdev_priv(vnet_dev[0]);
