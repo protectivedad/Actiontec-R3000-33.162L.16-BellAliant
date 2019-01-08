@@ -19,7 +19,7 @@ BUILD_DIR:=$(word 1, $(BUILD_DIR))
 
 include $(BUILD_DIR)/make.common
 
-APP = strace-4.8
+APP = strace-4.25
 
 clean:
 	@if [ -e $(APP)/Makefile ]; then \
@@ -39,7 +39,7 @@ ifneq ($(strip $(BUILD_STRACE)),)
 check_untar_patch_configure: sanity_check
 	@if [ ! -e $(APP)/Makefile.in ]; then \
     	echo "Untarring original $(APP) source"; \
-	    (tar xkf $(APP).tar.bz2 2> /dev/null || true); \
+	    (tar xkf $(APP).tar.xz 2> /dev/null || true); \
         fi; \
 	    (cd $(APP); ./configure --host=$(TOOLCHAIN_PREFIX) \
         --target=$(TOOLCHAIN_PREFIX) \
