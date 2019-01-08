@@ -20,7 +20,7 @@ BUILD_DIR:=$(word 1, $(BUILD_DIR))
 include $(BUILD_DIR)/make.common
 
 APP = ntfs-3g_ntfsprogs-2017.3.23
-SO_VER = 85
+SO_VER = 88
 
 CONFIGURE_VARS := \
 	PKG_CONFIG_LIBDIR=$(BCM_FSBUILD_DIR)/public/lib \
@@ -51,7 +51,7 @@ ifneq ($(strip $(BUILD_NTFS_3G)),)
 check_untar_patch_configure: sanity_check
 	@if [ ! -e $(APP)/Makefile.in ]; then \
     	echo "Untarring original $(APP) source"; \
-	    (tar xkf $(APP).tar.bz2 2> /dev/null || true); \
+	    (tar xkf $(APP).tgz 2> /dev/null || true); \
     	echo "Applying patches to $(APP)"; \
 	    patch -p1 -b -s -d$(APP) < $(APP).patch; \
 	if [ $$? -ne 0 ]; then\
@@ -62,7 +62,7 @@ check_untar_patch_configure: sanity_check
 
 conditional_build: check_untar_patch_configure
 	cd $(APP); $(MAKE) 
-	cp -d $(APP)/libntfs-3g/.libs/libntfs-3g.so* $(INSTALL_DIR)/lib
+	cp $(APP)/libntfs-3g/.libs/libntfs-3g.so.$(SO_VER) $(INSTALL_DIR)/lib
 	install -m 755 $(APP)/src/.libs/ntfs-3g  $(INSTALL_DIR)/bin/ntfs-3g
 	ln -srf $(INSTALL_DIR)/bin/ntfs-3g $(INSTALL_DIR)/sbin/mount.ntfs
 	install -m 755 $(APP)/ntfsprogs/.libs/mkntfs  $(INSTALL_DIR)/sbin/mkntfs
