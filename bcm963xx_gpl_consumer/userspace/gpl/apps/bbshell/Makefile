@@ -45,9 +45,8 @@ $(COMPILE_ID_FILE) : $(CONFIG_ID_FILE)
 	$(MAKE) -C $(APP) busybox 1>$(COMPILE_ID_FILE) 2>&1
 
 install: $(COMPILE_ID_FILE)
-	$(MAKE) -C $(APP) install
 	mkdir -p $(INSTALL_DIR)/flash/bin
-	cp $(APP)/_install/bin/busybox $(INSTALL_DIR)/flash/bin
+	cp $(APP)/busybox $(INSTALL_DIR)/flash/bin
 	echo "$(APP) is installed"
 
 else
