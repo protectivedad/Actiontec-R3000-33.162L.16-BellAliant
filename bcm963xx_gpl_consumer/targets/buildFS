@@ -16,8 +16,18 @@ if [ "$INSTALL_DIR" == "" ]; then
     INSTALL_DIR=./$PROFILE/fs.install
 fi
 
-cd /opt/toolchains/crosstools-arm-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-NPTL/lib
-cp libcdkshell.so libvlanctl.so libphysym.so libcdkpkgsrc.so libcdklibc.so libbmdapi.so libcdkdsym.so libbmdshell.so libbmedia.so libcdksym.so libbdlna.so libphypkgsrc.so libcms_dal.so libphygeneric.so libbmdshared.so libbmdpkgsrc.so libcms_core.so libcdkmain.so librdpactl.so libfcctl.so libtr143_utils.so libphyutil.so libb_playback_ip.so libnanoxml.so libethswctl.so libpwrctl.so libsnoopctl.so libcms_cli.so libtmctl.so libmdm.so libcms_qdm.so libbdlna-dms-aal.so libbdlna-dms.so libcdkshared.so  libcms_msg.so libcms_util.so libcms_boardctl.so libdbus.so libnvram.so libwlmngr.so  $TOP_DIR/$PROFILE/fs.install/lib
+[ ! -d $INSTALL_DIR/lib/private ] && mkdir -p $INSTALL_DIR/lib/private
+
+cd ${TOOLCHAIN}/${TOOLCHAIN_PREFIX}/usr/lib
+cp libdbus.so $INSTALL_DIR/lib
+
+cd ${TOOLCHAIN}/${TOOLCHAIN_PREFIX}/lib
+cp libnvram.so libwlmngr.so $INSTALL_DIR/lib
+cp librdpactl.so libsnoopctl.so libtmctl.so libtr143_utils.so libvlanctl.so $INSTALL_DIR/lib/private
+cp libethswctl.so libfcctl.so libmdm.so libnanoxml.so libpwrctl.so $INSTALL_DIR/lib/private
+cp libb_playback_ip.so libbdlna-dms-aal.so libbdlna-dms.so libbdlna.so libbmedia.so $INSTALL_DIR/lib/private
+cp libcms_dal.so libcms_core.so libcms_cli.so libcms_qdm.so $INSTALL_DIR/lib/private
+
 cd $TOP_DIR
 ROOTFS=$PROFILE/fs
 
@@ -290,14 +300,17 @@ if [ "$SSTRIP" != "/bin/touch" ]; then
     $SSTRIP $TOP_DIR/$ROOTFS/bin/* $TOP_DIR/$ROOTFS/lib/*.so* $TOP_DIR/$ROOTFS/lib/*/*.so*
 fi
 
+ln -fsr $INSTALL_DIR/lib/libqcsapi_client.so.1 $INSTALL_DIR/lib/libqcsapi_client.so
+ln -fsr $INSTALL_DIR/lib/libqcsapi_client.so.1 $INSTALL_DIR/lib/libqcsapi_client.so.1.0.1
+
 # Symlink the CMS libraries needed by busybox, which is also /sbin/init (the
 # first userspace process).  Once busybox is able to load and start,
 # it will read /etc/profile to get the LD_LIBRARY_PATH which points to all
 # the CMS libraries in their non-standard places.  The LD_LIBRARY_PATH is 
 # inherited by all userspace processes.
-test -e $TOP_DIR/$ROOTFS/lib/public/libcms_msg.so && ln -s /lib/public/libcms_msg.so $TOP_DIR/$ROOTFS/lib/libcms_msg.so
-test -e $TOP_DIR/$ROOTFS/lib/public/libcms_boardctl.so && ln -s /lib/public/libcms_boardctl.so $TOP_DIR/$ROOTFS/lib/libcms_boardctl.so
-test -e $TOP_DIR/$ROOTFS/lib/public/libcms_util.so && ln -s /lib/public/libcms_util.so $TOP_DIR/$ROOTFS/lib/libcms_util.so
+[ -e $TOP_DIR/$ROOTFS/lib/public/libcms_msg.so ] && ln -fsr $TOP_DIR/$ROOTFS/lib/public/libcms_msg.so $TOP_DIR/$ROOTFS/lib/libcms_msg.so
+[ -e $TOP_DIR/$ROOTFS/lib/public/libcms_boardctl.so ] && ln -fsr $TOP_DIR/$ROOTFS/lib/public/libcms_boardctl.so $TOP_DIR/$ROOTFS/lib/libcms_boardctl.so
+[ -e $TOP_DIR/$ROOTFS/lib/public/libcms_util.so ] && ln -fsr $TOP_DIR/$ROOTFS/lib/public/libcms_util.so $TOP_DIR/$ROOTFS/lib/libcms_util.so
 
 
 ###################################################
@@ -317,11 +330,13 @@ if [ -d $ACT_PROJECT_PATH ]; then
 fi
 
 if [ "$AEI_VDSL_WP" == "1" ]; then
+    mkdir -p $TOP_DIR/$ROOTFS/webs
     ln -sf /var/wirelesssettings.xml  $TOP_DIR/$ROOTFS/webs/wirelesssettings.xml
     ln -sf /var/firmwarelinks.xml  $TOP_DIR/$ROOTFS/webs/firmwarelinks.xml
 fi
 
 if [ "$AEI_VDSL_GUI_STYLE_CHANGE" == "1" ]; then
+    mkdir -p $TOP_DIR/$ROOTFS/webs/css $TOP_DIR/$ROOTFS/webs/images/button
     ln -sf /data/webs/basic.css $TOP_DIR/$ROOTFS/webs/css/basic.css
     ln -sf /data/webs/actiontec2.css $TOP_DIR/$ROOTFS/webs/css/actiontec2.css
     ln -sf /data/webs/logo.jpg $TOP_DIR/$ROOTFS/webs/images/logo.jpg
@@ -390,3 +405,21 @@ fi
 # any missing proprietary binaries using that tarball
 ( cd $TOP_DIR/$ROOTFS ; tar xzkf ../filesystem.tgz 2>/dev/null ; true )
 
+# Take out any unused libraries
+# Requires:
+#  Library names stored in clear string format as the library name preceeded with lib.
+#    -Not as library name and later lib is prepended or postpended to the filename before opening.
+#  Libraries are named the way they are used in the applications.
+#    -libname.so.1.2.2.3 i fine but libalias.so will fail.
+#     for example libname.so is linked as libalias.so and only libalias is used.
+
+# Find files named lib something or other
+LIBRARY_FILES=`find ${TOP_DIR}/${ROOTFS} -name 'lib*.so*' -type f -printf %f'\n'`
+# Shorten to base names to pick up used links
+LIBRARY_NAMES=`for lib in ${LIBRARY_FILES}; do echo ${lib%.so*}; done;`
+
+LIBRARY_UNUSED=`for lib in ${LIBRARY_NAMES}; do grep -rq $lib --exclude=$lib* ${TOP_DIR}/${ROOTFS} || echo $lib; done`
+echo "Potential unused libraries: "
+echo ${LIBRARY_UNUSED}
+
+#rm `for files in ${LIBRARY_UNUSED}; do find ${TOP_DIR}/${ROOTFS} -name $files.so*; done`

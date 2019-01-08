@@ -1027,6 +1027,7 @@ unittests_clean:
 	$(MAKE) -C unittests clean
 
 target_clean: sanity_check
+	rm -f $(PROFILE_DIR)/flash.tar.gz
 	rm -f $(PROFILE_DIR)/*.img
 	rm -f $(PROFILE_DIR)/vmlinux*
 	rm -f $(PROFILE_DIR)/*.w
