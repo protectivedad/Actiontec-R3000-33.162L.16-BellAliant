@@ -101,7 +101,6 @@ $(AUTODETECT_SUBDIRS_BASE):
 
 ifneq ($(strip $(BUILD_SSHD)),)
 sshd:
-	(tar xkjf sshd.tar.bz2 2> /dev/null || true)
 	$(MAKE) -C sshd
 else
 sshd:
@@ -111,6 +110,7 @@ endif
 ifneq ($(strip $(BUILD_IPV6)),)
 ifneq ($(strip $(AEI_CONTROL_LAYER)),)
 dhcpv6: sanity_check
+	(tar -C dhcpv6-aei --strip-components 1 -xkjf dhcpv6.tar.bz2 2> /dev/null || true)
 	$(MAKE) -j1 -C dhcpv6-aei
 else
 dhcpv6:

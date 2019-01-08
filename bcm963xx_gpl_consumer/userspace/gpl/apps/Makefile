@@ -151,17 +151,6 @@ dynahelper: sanity_check
 endif
 
 
-ifneq ($(strip $(BUILD_EBTABLES)),)
-ebtables: sanity_check
-	mkdir -p $(INSTALL_DIR)/bin
-	(tar xkfj ebtables.tar.bz2 2> /dev/null || true)
-	$(MAKE) -C ebtables $(BUILD_EBTABLES)
-else
-ebtables: sanity_check
-	@echo "skipping ebtables (not configured)"
-endif
-
-
 # ftpd does sanity check in its own Makefile
 ifneq ($(strip $(BUILD_FTPD)),)
 ftpd:
@@ -182,13 +171,8 @@ endif
 ifneq ($(strip $(DO_BUILD_IPROUTE2)),)
 iproute2: sanity_check
 	$(warning =================begin to compile iproute2=======================)
+	(tar xkfj iproute2.tar.bz2 2> /dev/null || true)
 	$(MAKE) -C iproute2 install
-#	(tar xkfj iproute2.tar.bz2 2> /dev/null || true)
-#	$(MAKE) -C iproute2 install
-#iproute2-2.6.37: sanity_check
-#	(tar xkfj iproute2.tar.bz2 2> /dev/null || true)
-	$(warning =================begin to compile iproute2-2.6.37=======================)
-#	$(MAKE) -C iproute2-2.6.37 dynamic
 else
 iproute2: sanity_check
 	@echo "skipping iproute2 (not configured)"
@@ -208,7 +192,6 @@ endif
 ifneq ($(strip $(BRCM_KERNEL_NETFILTER)),)
 ifneq ($(strip $(BUILD_IPTABLES)),)
 iptables: sanity_check
-	(tar xkfj iptables.tar.bz2 2> /dev/null || true)
 	$(MAKE) -C iptables $(BUILD_IPTABLES)
 else
 iptables: sanity_check
@@ -232,19 +215,6 @@ urlfilterd: sanity_check
 	@echo Warning: To use urlfilterd, you need to enable iptables!!!!!
 endif
 
-
-ifneq ($(strip $(BUILD_IPV6)),)
-radvd: sanity_check
-#	(tar xkjf radvd.tar.bz2 2> /dev/null || true)
-#	$(MAKE) -C radvd
-#	(tar xkzf radvd-1.8.tar.gz 2> /dev/null || true)
-#	$(MAKE) -C radvd-1.8
-	mkdir -p $(INSTALL_DIR)/bin
-	install -m 775 radvd-1.8/radvd $(INSTALL_DIR)/bin
-else
-radvd: sanity_check
-	@echo "skipping radvd (not configured)"
-endif
 
 ifneq ($(strip $(AEI_VDSL_CUSTOMER_NTPV4)),)
 ntpclient: sanity_check
