@@ -41,7 +41,7 @@ endif
 #
 # COPTS = -O2 -pipe -Wall -g
 #COPTS = -O2 -pipe -Wall -DDEBUG
-COPTS = -s -pipe -Wall -Os -fno-strict-aliasing 
+COPTS = -s -pipe -Wall -Os -fno-strict-aliasing -fno-aggressive-loop-optimizations
 COPTS += $(BRCM_WERROR_CFLAGS)
 
 ifneq ($(strip $(AEI_CONTROL_LAYER)),)

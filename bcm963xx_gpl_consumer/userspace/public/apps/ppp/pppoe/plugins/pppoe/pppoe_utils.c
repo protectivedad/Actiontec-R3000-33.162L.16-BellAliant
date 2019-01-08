@@ -28,7 +28,7 @@
 #include <unistd.h>		/* STDIN_FILENO,exec    */
 #include <errno.h>		/* errno                */
 
-#include <sys/time.h>
+#include <time.h>
 
 #include <net/ethernet.h>
 #include <netinet/in.h>

@@ -10,7 +10,7 @@
  */
 
 #include "libbb.h"
-
+#include <sched.h>
 
 typedef struct unsigned_to_name_map_t {
 	long id;

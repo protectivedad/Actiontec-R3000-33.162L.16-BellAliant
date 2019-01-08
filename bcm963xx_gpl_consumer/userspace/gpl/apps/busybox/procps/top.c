@@ -32,7 +32,7 @@
  */
 
 #include "libbb.h"
-
+#include <sched.h>
 
 typedef struct top_status_t {
 	unsigned long vsz;

@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <time.h>
+
 #include "dproxy.h"
 #include "conf.h"
 #include "dns_decode.h"

@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "dns_list.h"
 #include "dns_io.h"

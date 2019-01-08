@@ -5,6 +5,7 @@
 #include <libnetfilter_queue/libnetfilter_queue.h>
 #include <syslog.h>
 #include <unistd.h>
+#include <time.h>
 #include "filter.h"
 #include <signal.h>
 #if defined (AEI_VDSL_CUSTOMER_NCS)
