@@ -9,6 +9,7 @@
 # file to inittab.custom and replace "-/bin/sh -l -c consoled" below with "-/bin/sh"
 # The '-' means interactive, is still attached to terminal
 ::respawn:-/bin/sh -l -c consoled
+::wait:/bin/sh -c '/data/dropbear/dropbear.init start'
 
 # Currently, there are no scripts for shutdown
 ::shutdown:/bin/sh -l -c "bcm_boot_launcher stop"
