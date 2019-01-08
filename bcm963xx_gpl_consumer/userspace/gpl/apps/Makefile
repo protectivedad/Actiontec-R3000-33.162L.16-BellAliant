@@ -244,8 +244,7 @@ endif
 
 ifneq ($(strip $(BUILD_SAMBA)),)
 samba: sanity_check
-	(tar xkfz samba.tar.gz 2> /dev/null || true)
-	$(MAKE) -C ./samba -j 1
+	$(MAKE) -C ./samba4
 else
 samba: sanity_check 
 	@echo "skipping $@ (not configured)"
