@@ -1,5 +1,26 @@
 #!/bin/bash
 
+
+# Take out any unused libraries
+# Requires:
+#  Library names stored in clear string format as the library name preceeded with lib.
+#    -Not as library name and later lib is prepended or postpended to the filename before opening.
+#  Libraries are named the way they are used in the applications.
+#    -libname.so.1.2.2.3 i fine but libalias.so will fail.
+#     for example libname.so is linked as libalias.so and only libalias is used.
+find_unused_libs ()
+{
+
+  # Find files named lib something or other
+  LIBRARY_FILES=`find ${TOP_DIR}/${ROOTFS} -name 'lib*.so*' -type f -printf %f'\n'`
+  # Shorten to base names to pick up used links
+  LIBRARY_NAMES=`for lib in ${LIBRARY_FILES}; do echo ${lib%.so*}; done;`
+
+  LIBRARY_UNUSED=`for lib in ${LIBRARY_NAMES}; do grep -rq $lib --exclude=$lib* ${TOP_DIR}/${ROOTFS} || echo $lib; done`
+  echo ${LIBRARY_UNUSED}
+
+}
+
 source $KERNEL_DIR/.config
 
 TOP_DIR=`pwd`
@@ -290,6 +311,11 @@ for f in $MODULE_CLEAN_UP; do \
 done
 eval "find $TOP_DIR/$ROOTFS/lib/modules -name wlobj-*.ko | xargs rm -f"
 
+for kernel_mod in `find $TOP_DIR/$ROOTFS/lib/modules -name "*.ko"`; do
+  xz -z $kernel_mod ; mv $kernel_mod.xz $kernel_mod
+done
+
+
 # strip userspace binaries is sstrip is "enabled"
 # sstrip is set to /bin/touch if BUILD_GDBSERVER=y
 if [ "$SSTRIP" != "/bin/touch" ]; then
@@ -405,21 +431,9 @@ fi
 # any missing proprietary binaries using that tarball
 ( cd $TOP_DIR/$ROOTFS ; tar xzkf ../filesystem.tgz 2>/dev/null ; true )
 
-# Take out any unused libraries
-# Requires:
-#  Library names stored in clear string format as the library name preceeded with lib.
-#    -Not as library name and later lib is prepended or postpended to the filename before opening.
-#  Libraries are named the way they are used in the applications.
-#    -libname.so.1.2.2.3 i fine but libalias.so will fail.
-#     for example libname.so is linked as libalias.so and only libalias is used.
 
-# Find files named lib something or other
-LIBRARY_FILES=`find ${TOP_DIR}/${ROOTFS} -name 'lib*.so*' -type f -printf %f'\n'`
-# Shorten to base names to pick up used links
-LIBRARY_NAMES=`for lib in ${LIBRARY_FILES}; do echo ${lib%.so*}; done;`
-
-LIBRARY_UNUSED=`for lib in ${LIBRARY_NAMES}; do grep -rq $lib --exclude=$lib* ${TOP_DIR}/${ROOTFS} || echo $lib; done`
-echo "Potential unused libraries: "
-echo ${LIBRARY_UNUSED}
-
-#rm `for files in ${LIBRARY_UNUSED}; do find ${TOP_DIR}/${ROOTFS} -name $files.so*; done`
+LIBRARY_UNUSED=$(find_unused_libs)
+until [ -z "$LIBRARY_UNUSED" ]; do
+  rm `for files in ${LIBRARY_UNUSED}; do find ${TOP_DIR}/${ROOTFS} -name $files.so*; done`
+  LIBRARY_UNUSED=$(find_unused_libs)
+done
