@@ -1,0 +1,300 @@
+--- a/busybox/include/libbb.h
++++ b/busybox/include/libbb.h
+@@ -175,6 +175,9 @@
+ # define STRERROR_ERRNO  ,strerror(errno)
+ #endif
+ 
++#ifdef BRCM_CMS_BUILD
++# include <sched.h>
++#endif
+ 
+ /* Some libc's forget to declare these, do it ourself */
+ 
+@@ -1837,6 +1840,11 @@ typedef struct procps_status_t {
+ #if ENABLE_FEATURE_TOP_SMP_PROCESS
+ 	int last_seen_on_cpu;
+ #endif
++#ifdef BRCM_CMS_BUILD
++	int cpu_affinity;
++	int priority;
++	int sched_policy;
++#endif
+ } procps_status_t;
+ /* flag bits for procps_scan(xx, flags) calls */
+ enum {
+--- a/busybox/libbb/procps.c
++++ b/busybox/libbb/procps.c
+@@ -447,7 +447,12 @@ procps_status_t* FAST_FUNC procps_scan(p
+ 			cp = skip_fields(cp, 6); /* tpgid, flags, min_flt, cmin_flt, maj_flt, cmaj_flt */
+ 			sp->utime = fast_strtoul_10(&cp);
+ 			sp->stime = fast_strtoul_10(&cp);
+-			cp = skip_fields(cp, 3); /* cutime, cstime, priority */
++# ifdef BRCM_CMS_BUILD
++			cp = skip_fields(cp, 2); /* cutime, cstime */
++			sp->priority = (int) fast_strtol_10(&cp);
++# else
++ 			cp = skip_fields(cp, 3); /* cutime, cstime, priority */
++# endif
+ 			tasknice = fast_strtol_10(&cp);
+ 			cp = skip_fields(cp, 2); /* timeout, it_real_value */
+ 			sp->start_time = fast_strtoul_10(&cp);
+@@ -462,12 +467,27 @@ procps_status_t* FAST_FUNC procps_scan(p
+ 			cp = skip_fields(cp, 14);
+ //FIXME: is it safe to assume this field exists?
+ 			sp->last_seen_on_cpu = fast_strtoul_10(&cp);
++#  ifdef BRCM_CMS_BUILD
++			cp = skip_fields(cp, 1);
++			sp->sched_policy = (int) fast_strtol_10(&cp);
++#  endif
+ # endif
+ #endif /* FEATURE_FAST_TOP */
+ 
+ #if ENABLE_FEATURE_PS_ADDITIONAL_COLUMNS
+ 			sp->niceness = tasknice;
+ #endif
++#ifdef BRCM_CMS_BUILD
++			{
++				// see taskset.c
++				cpu_set_t mask;
++				sp->cpu_affinity = 0;
++				if (sched_getaffinity(pid, sizeof(mask), &mask) >= 0) {
++					if (CPU_ISSET(0, &mask)) sp->cpu_affinity |= 1;
++					if (CPU_ISSET(1, &mask)) sp->cpu_affinity |= 2;
++				}
++			}
++#endif
+ 			sp->state[1] = ' ';
+ 			sp->state[2] = ' ';
+ 			s_idx = 1;
+--- a/busybox/procps/top.c
++++ b/busybox/procps/top.c
+@@ -132,6 +132,11 @@ typedef struct top_status_t {
+ #if ENABLE_FEATURE_TOP_SMP_PROCESS
+ 	int last_seen_on_cpu;
+ #endif
++#ifdef BRCM_CMS_BUILD
++	int cpu_affinity;
++	int priority;
++	int sched_policy;
++#endif
+ } top_status_t;
+ 
+ typedef struct jiffy_counts_t {
+@@ -218,6 +223,20 @@ struct globals {
+ 	BUILD_BUG_ON(LINE_BUF_SIZE <= 80); \
+ } while (0)
+ 
++#ifdef BRCM_CMS_BUILD
++int cpufilter=-1;
++int altdisplay=0;
++enum {
++	OPT_d = (1 << 0),
++	OPT_n = (1 << 1),
++	OPT_c = (1 << 2),
++	OPT_l = (1 << 3),
++	OPT_a = (1 << 4),
++	OPT_b = (1 << 5),
++	OPT_m = (1 << 6),
++	OPT_EOF = (1 << 7), /* pseudo: "we saw EOF in stdin" */
++};
++#else
+ enum {
+ 	OPT_d = (1 << 0),
+ 	OPT_n = (1 << 1),
+@@ -225,8 +244,20 @@ enum {
+ 	OPT_m = (1 << 3),
+ 	OPT_EOF = (1 << 4), /* pseudo: "we saw EOF in stdin" */
+ };
++#endif /* BRCM_CMS_BUILD */
+ #define OPT_BATCH_MODE (option_mask32 & OPT_b)
+ 
++#ifdef BRCM_CMS_BUILD
++static int prio_sort(top_status_t *P, top_status_t *Q)
++{
++	return (P->priority - Q->priority);
++}
++
++static int affinity_sort(top_status_t *P, top_status_t *Q)
++{
++	return (Q->cpu_affinity - P->cpu_affinity);
++}
++#endif  /* BRCM_CMS_BUILD */
+ 
+ #if ENABLE_FEATURE_TOP_INTERACTIVE
+ static int pid_sort(top_status_t *P, top_status_t *Q)
+@@ -619,6 +650,16 @@ static NOINLINE void display_process_lis
+ #endif
+ 
+ 	/* what info of the processes is shown */
++#ifdef BRCM_CMS_BUILD
++	int local_ntops;
++	if (altdisplay)
++		printf(OPT_BATCH_MODE ? "%.*s" : ESC"[7m" "%.*s" ESC"[m", scr_width,
++			"  PID  PPID USER     STAT  INFO PRIO"
++			IF_FEATURE_TOP_SMP_PROCESS(" CPU")
++			IF_FEATURE_TOP_CPU_USAGE_PERCENTAGE(" %CPU")
++			" COMMAND");
++	else
++#endif
+ 	printf(OPT_BATCH_MODE ? "%.*s" : ESC"[7m" "%.*s" ESC"[m", scr_width,
+ 		"  PID  PPID USER     STAT   VSZ %VSZ"
+ 		IF_FEATURE_TOP_SMP_PROCESS(" CPU")
+@@ -687,7 +728,15 @@ static NOINLINE void display_process_lis
+ 	if (lines_rem > ntop - G_scroll_ofs)
+ 		lines_rem = ntop - G_scroll_ofs;
+ 	s = top + G_scroll_ofs;
+-	while (--lines_rem >= 0) {
++#ifdef BRCM_CMS_BUILD
++	if (altdisplay && cpufilter >= 0)
++		pcpu_shift--;
++
++	local_ntops = ntop;
++	while (lines_rem > 0 && local_ntops > 0) {
++#else
++ 	while (--lines_rem >= 0) {
++#endif
+ 		char vsz_str_buf[8];
+ 		unsigned col;
+ 
+@@ -695,9 +744,39 @@ static NOINLINE void display_process_lis
+ #if ENABLE_FEATURE_TOP_CPU_USAGE_PERCENTAGE
+ 		CALC_STAT(pcpu, (s->pcpu*pcpu_scale + pcpu_half) >> pcpu_shift);
+ #endif
+-
++#ifdef BRCM_CMS_BUILD
++		local_ntops--;
++		if (cpufilter >= 0 && cpufilter != s->last_seen_on_cpu) {
++			s++;
++			continue;
++		}
++		lines_rem--;
++#endif
+ 		smart_ulltoa5(s->vsz, vsz_str_buf, " mgtpezy");
+ 		/* PID PPID USER STAT VSZ %VSZ [%CPU] COMMAND */
++#ifdef BRCM_CMS_BUILD
++		if (altdisplay) {
++			sprintf(vsz_str_buf, "       ");
++			if (SCHED_OTHER == s->sched_policy)
++				vsz_str_buf[6] = 'O';
++			else if (SCHED_FIFO == s->sched_policy)
++				vsz_str_buf[6] = 'F';
++			else if (SCHED_RR == s->sched_policy)
++				vsz_str_buf[6] = 'R';
++			else
++				vsz_str_buf[6] = '?';
++			col = snprintf(line_buf, scr_width,
++					"\n" "%5u%6u %-8.8s %s  %.5s" "%5d %d:%d"
++					IF_FEATURE_TOP_CPU_USAGE_PERCENTAGE(FMT)
++					" ",
++					s->pid, s->ppid, get_cached_username(s->uid),
++					s->state, vsz_str_buf,
++					s->priority, s->cpu_affinity, s->last_seen_on_cpu
++					IF_FEATURE_TOP_CPU_USAGE_PERCENTAGE(, SHOW_STAT(pcpu))
++				);
++		}
++		else
++#endif
+ 		col = snprintf(line_buf, scr_width,
+ 				"\n" "%5u%6u %-8.8s %s  %.5s" FMT
+ 				IF_FEATURE_TOP_SMP_PROCESS(" %3d")
+@@ -958,7 +1037,14 @@ static unsigned handle_input(unsigned sc
+ 		c |= 0x20; /* lowercase */
+ 		if (c == 'q')
+ 			return EXIT_MASK;
+-
++#ifdef BRCM_CMS_BUILD
++		if (c == 'y') {
++			sort_function[0] = prio_sort;
++			sort_function[1] = affinity_sort;
++			sort_function[2] = pid_sort;
++			continue;
++		}
++#endif /* BRCM_CMS_BUILD */
+ 		if (c == 'n') {
+ 			IF_FEATURE_TOPMEM(scan_mask = TOP_MASK;)
+ 			sort_function[0] = pid_sort;
+@@ -1047,7 +1133,15 @@ static unsigned handle_input(unsigned sc
+ //usage:#define top_full_usage "\n\n"
+ //usage:       "Provide a view of process activity in real time."
+ //usage:   "\n""Read the status of all processes from /proc each SECONDS"
+-//usage:   "\n""and display a screenful of them."
++//usage:   "\n""and display a screenful of them.\n"
++//usage:       "BCM options:\n"
++//usage:       "  -a enable alt display mode\n"
++//usage:       "  -c0|1 filter output by CPU\n"
++//usage:       "  -lNUM set max lines for output (default is 24)\n"
++//usage:       "While top is running:\n"
++//usage:       "--press c to toggle between per-cpu and aggregate CPU modes.\n"
++//usage:       "--press p to sort by cpu percentage.\n"
++//usage:       "--press y to sort by priority (BCM). "
+ //usage:   "\n"
+ //usage:	IF_FEATURE_TOP_INTERACTIVE(
+ //usage:       "Keys:"
+@@ -1096,6 +1190,10 @@ int top_main(int argc UNUSED_PARAM, char
+ 	unsigned col;
+ 	unsigned interval;
+ 	char *str_interval, *str_iterations;
++#ifdef BRCM_CMS_BUILD
++	char *str_cpufilter, *str_xlines;
++	int xlines=0;
++#endif
+ 	unsigned scan_mask = TOP_MASK;
+ 
+ 	INIT_G();
+@@ -1111,7 +1209,11 @@ int top_main(int argc UNUSED_PARAM, char
+ 
+ 	/* all args are options; -n NUM */
+ 	make_all_argv_opts(argv); /* options can be specified w/o dash */
+-	col = getopt32(argv, "d:n:b"IF_FEATURE_TOPMEM("m"), &str_interval, &str_iterations);
++#ifdef BRCM_CMS_BUILD
++	col = getopt32(argv, "d:n:c:l:ab"IF_FEATURE_TOPMEM("m"), &str_interval, &str_iterations, &str_cpufilter, &str_xlines);
++#else
++ 	col = getopt32(argv, "d:n:b"IF_FEATURE_TOPMEM("m"), &str_interval, &str_iterations);
++#endif
+ #if ENABLE_FEATURE_TOPMEM
+ 	if (col & OPT_m) /* -m (busybox specific) */
+ 		scan_mask = TOPMEM_MASK;
+@@ -1129,6 +1231,20 @@ int top_main(int argc UNUSED_PARAM, char
+ 		iterations = xatou(str_iterations);
+ 	}
+ 
++#ifdef BRCM_CMS_BUILD
++	if (col & OPT_c) {
++		cpufilter = xatou(str_cpufilter);
++		if (cpufilter != 0 && cpufilter != 1) {
++			printf("cpufilter must be 0 or 1\n");
++			exit(0);
++		}
++	}
++	if (col & OPT_l)
++		xlines = xatou(str_xlines);
++	if (col & OPT_a)
++		altdisplay = 1;;
++#endif
++
+ 	/* change to /proc */
+ 	xchdir("/proc");
+ 
+@@ -1172,6 +1288,10 @@ int top_main(int argc UNUSED_PARAM, char
+ 				sleep(interval);
+ 				continue;
+ 			}
++#ifdef BRCM_CMS_BUILD
++			if (xlines > 0)
++				G.lines = xlines;
++#endif
+ 			if (col > LINE_BUF_SIZE - 2)
+ 				col = LINE_BUF_SIZE - 2;
+ 		}
+@@ -1196,6 +1316,11 @@ int top_main(int argc UNUSED_PARAM, char
+ #if ENABLE_FEATURE_TOP_SMP_PROCESS
+ 				top[n].last_seen_on_cpu = p->last_seen_on_cpu;
+ #endif
++#ifdef BRCM_CMS_BUILD
++				top[n].priority = p->priority;
++				top[n].cpu_affinity = p->cpu_affinity;
++				top[n].sched_policy = p->sched_policy;
++#endif
+ 			}
+ #if ENABLE_FEATURE_TOPMEM
+ 			else { /* TOPMEM */

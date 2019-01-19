@@ -1,0 +1,52 @@
+--- a/busybox/Makefile
++++ b/busybox/Makefile
+@@ -327,6 +327,9 @@
+ KERNELRELEASE = $(shell cat .kernelrelease 2> /dev/null)
+ KERNELVERSION = $(VERSION).$(PATCHLEVEL).$(SUBLEVEL)$(EXTRAVERSION)
+ 
++# brcm: avoid rebuild busybox when there is no config changed.
++BUSYBOX_CONFDIFF := $(shell if [ -e ./.config.old ]; then cmp -i 106 ./.config ./.config.old; else echo yes; fi)
++
+ export	VERSION PATCHLEVEL SUBLEVEL KERNELRELEASE KERNELVERSION \
+ 	ARCH CONFIG_SHELL HOSTCC HOSTCFLAGS CROSS_COMPILE AS LD CC \
+ 	CPP AR NM STRIP OBJCOPY OBJDUMP MAKE AWK GENKSYMS PERL UTS_MACHINE \
+@@ -360,8 +363,13 @@
+ 
+ # This target generates Kbuild's and Config.in's from *.c files
+ PHONY += gen_build_files
++ifneq ($(strip $(BUSYBOX_CONFDIFF)),)
+ gen_build_files: $(wildcard $(srctree)/*/*.c) $(wildcard $(srctree)/*/*/*.c)
+ 	$(Q)$(srctree)/scripts/gen_build_files.sh $(srctree) $(objtree)
++else
++gen_build_files: 
++	@echo "skipping busybox: gen_build_files.sh"
++endif
+ 
+ # bbox: we have helpers in applets/
+ # we depend on scripts_basic, since scripts/basic/fixdep
+@@ -958,6 +966,7 @@
+ CLEAN_DIRS  += $(MODVERDIR) _install 0_lib
+ CLEAN_FILES +=	busybox busybox_unstripped* busybox.links \
+                 System.map .kernelrelease \
++		include/config/prefix.h \
+                 .tmp_kallsyms* .tmp_version .tmp_busybox* .tmp_System.map
+ 
+ # Directories & files removed with 'make mrproper'
+@@ -981,7 +990,8 @@
+ $(clean-dirs):
+ 	$(Q)$(MAKE) $(clean)=$(patsubst _clean_%,%,$@)
+ 
+-clean: archclean $(clean-dirs)
++# brcm-bca: call distclean to clean up some runtime files.
++clean: archclean $(clean-dirs) distclean
+ 	$(call cmd,rmdirs)
+ 	$(call cmd,rmfiles)
+ 	@find . $(RCS_FIND_IGNORE) \
+@@ -1022,6 +1032,7 @@
+ 		-o -name '.*.rej' -o -name '*.tmp' -o -size 0 \
+ 		-o -name '*%' -o -name '.*.cmd' -o -name 'core' \) \
+ 		-type f -print | xargs rm -f
++	@rm -f $(srctree)/include/usage.h $(srctree)/include/applets.h $(srctree)/include/NUM_APPLETS.h
+ 
+ 
+ # Packaging of the kernel to various formats

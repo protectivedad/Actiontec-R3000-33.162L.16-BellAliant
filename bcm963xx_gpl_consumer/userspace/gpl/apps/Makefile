@@ -12,7 +12,7 @@
 # that directory during make and make clean.  (Auto detected directories
 # are listed in the AUTODETECT_SUBDIRS variable.  Type make show_subdirs)
 #
-HARDCODED_SUBDIRS := atm2684 bridge-utils busybox sysstat dproxy-nexgen \
+HARDCODED_SUBDIRS := atm2684 bridge-utils sysstat dproxy-nexgen \
            ftpd iproute2 udhcp urlfilterd zebra \
            dynahelper samba iperf conntrack \
            openl2tpd rng-tools-2 pptp \
@@ -94,29 +94,6 @@ else
 bridge-utils: sanity_check
 endif
 
-
-ifeq ($(strip $(BRCM_IKOS)),y)
-BRCMCONFIG=ikos.config
-else
-BRCMCONFIG=brcm.config
-endif
-export BRCMCONFIG
-
-PERL5LIB=$(HOSTTOOLS_PERL_LIB)
-export PERL5LIB
-
-ifneq ($(strip $(BUILD_BUSYBOX)),)
-busybox: sanity_check
-	mkdir -p $(INSTALL_DIR)/bin
-	(tar xkfj busybox.tar.bz2 2> /dev/null || true)
-	cd busybox; chmod -f +w .config .config.old ; cp -f .config .config.old; cat $(BRCMCONFIG) > .config ; \
-	for i in config.d/[0-9]*.conf ; do echo "config script $$i" ; perl $$i ; done
-	$(MAKE) -C busybox include/autoconf.h
-	$(MAKE) -C busybox install
-else
-busybox: sanity_check
-	@echo "skipping busybox (not configured)"
-endif
 
 ifneq ($(strip $(BUILD_SYSSTAT)),)
 sysstat: sanity_check
