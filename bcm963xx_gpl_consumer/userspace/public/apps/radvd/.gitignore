@@ -1,0 +1,12 @@
+/*
+!/.gitignore
+!/Makefile
+!/config.h
+!/defaults.h
+!/device-linux.c
+!/gram.c
+!/gram.h
+!/ifaddrs.c
+!/ifaddrs.h
+!/radvd.c
+!/scanner.c

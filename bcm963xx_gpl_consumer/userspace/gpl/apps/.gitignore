@@ -1,0 +1,12 @@
+*.o
+*.a
+*.so
+
+/udhcp/dumpleases
+/udhcp/udhcpd
+/urlfilterd/urlfilterd
+/zebra/
+/sysstat/
+/iproute2/
+/ftpd/
+/dproxy-nexgen/

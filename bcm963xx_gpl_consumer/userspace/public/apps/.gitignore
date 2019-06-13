@@ -1,0 +1,15 @@
+*.o
+*.d
+*.a
+
+/bcm_boot_launcher/bcm_boot_launcher
+/bdmf_shell/bdmf_shell
+/dhrystone/dry
+/ledctl/ledctl
+/memaccess/memaccess
+/ppp/pppoe/pppd
+/psictl/psictl
+/scratchpadctl/scratchpadctl
+/send_cms_msg/send_cms_msg
+/stund/stund
+/dhcpv6-aei/

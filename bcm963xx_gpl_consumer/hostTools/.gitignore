@@ -1,0 +1,16 @@
+*.o
+*.a
+*.c.dep
+
+/mtd-utils-20090606/mkfs.ubifs/mkfs.ubifs
+/mtd-utils-20090606/ubi-utils/mtdinfo
+/mtd-utils-20090606/ubi-utils/ubiattach
+/mtd-utils-20090606/ubi-utils/ubicrc32
+/mtd-utils-20090606/ubi-utils/ubidetach
+/mtd-utils-20090606/ubi-utils/ubiformat
+/mtd-utils-20090606/ubi-utils/ubimkvol
+/mtd-utils-20090606/ubi-utils/ubinfo
+/mtd-utils-20090606/ubi-utils/ubinize
+/mtd-utils-20090606/ubi-utils/ubirename
+/mtd-utils-20090606/ubi-utils/ubirmvol
+/mtd-utils-20090606/ubi-utils/ubiupdatevol

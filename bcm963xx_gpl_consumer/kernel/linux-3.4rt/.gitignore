@@ -101,4 +101,5 @@ arch/arm/boot/compressed/vmlinux
 initramfs
 /*.sh
 
-arch/arm/defconfig
+/arch/arm/defconfig
+/include/linux/bcm_swversion.h
