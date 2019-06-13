@@ -26,7 +26,7 @@ CONFIGURE_ARGS := \
 ifeq ($(strip $(BUILD_MTDUTILS)),y)
 build: 
 	[ ! -e $(APP)/autogen.sh ] && \
-	   git clone --branch v2.0.2 --depth 1 http://git.infradead.org/mtd-utils.git || true
+	   git clone --branch v2.0.2 --depth 1 git://git.infradead.org/mtd-utils.git || true
 	[ ! -e $(APP)/configure ] && \
 	   cd $(APP) ; ./autogen.sh || true
 	[ ! -e $(APP)/Makefile ] && \
