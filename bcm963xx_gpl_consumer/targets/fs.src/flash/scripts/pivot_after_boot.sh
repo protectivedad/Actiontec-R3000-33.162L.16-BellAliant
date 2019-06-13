@@ -1,4 +1,4 @@
-#!/data/bin/busybox ash
+#!/bin/sh
 
 /data/scripts/mount_ubi1_0.sh
 
@@ -13,8 +13,9 @@ mount -o move /var var/
 mount -o move /data data/
 mount -o move /bootfs bootfs/
 
-pivot_root /home /home/oldroot
+/home/sbin/pivot_root /home /home/oldroot
 
 kill -HUP 1
+killall -HUP smd
 
-[ -e /bin/scp ] && ln -s /data/dropbear/scp /bin || true
+/etc/init.d/dropbear.sh start

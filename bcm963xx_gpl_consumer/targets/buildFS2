@@ -7,7 +7,8 @@
 source $KERNEL_DIR/.config
 
 # Pull out the flash directory and put into tar file.
-tar --group 0 --owner 0 -C $TARGET_FS/flash -czf $PROFILE_DIR/flash.tar.gz .
+tar --group 0 --owner 0 --remove-files -C $TARGET_FS/flash -czf $PROFILE_DIR/flash.tar.gz .
+rmdir $TARGET_FS/flash
 
 # Create devices
 # (Swited from device table to fakeroot for device nodes - always use makeDevs)
