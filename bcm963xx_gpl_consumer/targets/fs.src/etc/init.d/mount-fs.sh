@@ -41,7 +41,7 @@ case "$1" in
 		mkdir -p /var/log /var/run /var/state/dhcp /var/ppp /var/udhcpd /var/zebra /var/siproxd /var/cache /var/tmp /var/samba /var/samba/share /var/samba/homes /var/samba/private /var/samba/locks
 		cp  /etc/smb.conf /var/samba/ 2>/dev/null
 
-		if [ -e /data/.pivot_once -o -e /data/.pivot_perm ]; then
+		if [ -e /data/.mount_pivot ]; then
 			ubiattach -m1 -d1 && mount -t ubifs ubi1:rootfs_pivot /home
 			if [ -e /data/.pivot_once -a -e /home/sbin/pivot_root ]; then
 				rm -f /data/.pivot_once /data/.pivot_perm

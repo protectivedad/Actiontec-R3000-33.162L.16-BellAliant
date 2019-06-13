@@ -3,7 +3,7 @@
 trap "" 2
 
 #The following will be populated by buildFS during the make process:
-KERNELVER=_set_by_buildFS_
+KERNELVER=`uname -r`
 
 if [ ! -d /lib/modules/$KERNELVER/extra ]; then
 	echo "ERROR: gre-tunnel-drivers.sh: /lib/modules/$KERNELVER/extra does not exist" 1>&2
