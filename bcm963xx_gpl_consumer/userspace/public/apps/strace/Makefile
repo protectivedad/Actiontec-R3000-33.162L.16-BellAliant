@@ -66,6 +66,7 @@ check_config: check_patch
 conditional_build: check_config
 	$(MAKE) -C $(APP)
 	$(MAKE) -C $(APP) install
+	rm -rf $(INSTALL_DIR)/share
 
 else
 conditional_build: sanity_check
