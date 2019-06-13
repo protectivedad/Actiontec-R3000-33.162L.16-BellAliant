@@ -27,10 +27,7 @@ CONFIGURE_VARS := \
 
 CONFIGURE_ARGS := \
 	--host=$(TOOLCHAIN_PREFIX) \
-	--prefix=/flash/dropbear \
-	--bindir=/flash/dropbear \
-	--sbindir=/flash/dropbear \
-	--disable-zlib \
+	--prefix=/ \
 	--disable-lastlog
 
 export LINUX_VER_STR TOOLCHAIN_PREFIX
@@ -63,7 +60,7 @@ $(CONFIG_ID_FILE): $(PATCH_ID_FILE)
 
 conditional_build: $(CONFIG_ID_FILE)
 	$(MAKE) -C dropbear DESTDIR=$(INSTALL_DIR) PROGRAMS="dropbear dropbearkey scp" strip install
-	rm -rf $(INSTALL_DIR)/flash/dropbear/share
+	rm -rf $(INSTALL_DIR)/share
 
 clean:
 	-$(MAKE) -C $(APP) distclean
