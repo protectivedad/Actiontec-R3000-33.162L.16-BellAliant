@@ -111,7 +111,7 @@ $(CONFIG_ID_FILE) : $(PATCH_ID_FILE)
 $(COMPILE_ID_FILE) : $(CONFIG_ID_FILE)
 	$(MAKE) -C $(APP) 1>$(COMPILE_ID_FILE) 2>&1
 
-install: $(COMPILE_ID_FILE)
+install: sanity_check $(COMPILE_ID_FILE)
 	$(MAKE) -C $(APP) DESTDIR=$(BCM_FSBUILD_DIR)/$(APP) install
 	@mkdir -p $(INSTALL_DIR)/lib/gpl $(INSTALL_DIR)/lib/private $(INSTALL_DIR)/bin
 	@cp -fd $(BCM_FSBUILD_DIR)/$(APP)/lib/gpl/*.so* $(INSTALL_DIR)/lib/gpl/

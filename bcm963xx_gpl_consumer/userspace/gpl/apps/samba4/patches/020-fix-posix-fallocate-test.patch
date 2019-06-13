@@ -1,0 +1,13 @@
+--- a/samba/lib/replace/wscript
++++ b/samba/lib/replace/wscript
+@@ -328,7 +328,9 @@ def configure(conf):
+ 
+     # glibc up to 2.3.6 had dangerously broken posix_fallocate(). DON'T USE IT.
+     if conf.CHECK_CODE('''
+-#define _XOPEN_SOURCE 600
++#ifndef _XOPEN_SOURCE
++# define _XOPEN_SOURCE 600
++#endif
+ #include <stdlib.h>
+ #if defined(__GLIBC__) && ((__GLIBC__ < 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ < 4))
+ #error probably broken posix_fallocate

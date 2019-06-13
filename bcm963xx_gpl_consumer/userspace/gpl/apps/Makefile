@@ -14,7 +14,7 @@
 #
 HARDCODED_SUBDIRS := atm2684 bridge-utils sysstat dproxy-nexgen \
            ftpd iproute2 udhcp urlfilterd zebra \
-           dynahelper samba iperf conntrack \
+           dynahelper iperf conntrack \
            openl2tpd rng-tools-2 pptp \
            mtd-util \
            felix_framework
@@ -223,14 +223,6 @@ zebra: sanity_check
 else
 zebra: sanity_check
 	@echo "skipping zebra (not configured)"
-endif
-
-ifneq ($(strip $(BUILD_SAMBA)),)
-samba: sanity_check
-	$(MAKE) -C ./samba4
-else
-samba: sanity_check 
-	@echo "skipping $@ (not configured)"
 endif
 
 ifneq ($(strip $(BUILD_IPERF)),)
