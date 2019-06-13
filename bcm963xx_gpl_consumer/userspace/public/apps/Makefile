@@ -110,7 +110,9 @@ endif
 ifneq ($(strip $(BUILD_IPV6)),)
 ifneq ($(strip $(AEI_CONTROL_LAYER)),)
 dhcpv6: sanity_check
+	mkdir -p dhcpv6-aei
 	(tar -C dhcpv6-aei --strip-components 1 -xkjf dhcpv6.tar.bz2 2> /dev/null || true)
+	(patch -d dhcpv6-aei -F0 -Ns -p1 -i ../dhcpv6-aei.patch || true)
 	$(MAKE) -j1 -C dhcpv6-aei
 else
 dhcpv6:
